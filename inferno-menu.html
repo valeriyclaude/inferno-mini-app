@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Inferno — меню</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Oswald:wght@300;400;500;600&family=Pirata+One&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#14110F; --surface:#1C1714; --line:#2C2420;
+    --ink:#ECE3D6; --muted:#9C8E7C; --ember:#E8631F; --blood:#C01E10;
+  }
+  *{box-sizing:border-box;}
+  html{-webkit-text-size-adjust:100%;}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:'Manrope',system-ui,sans-serif; line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:700px; margin:0 auto; padding:0 22px 64px;}
+
+  /* hero */
+  .hero{text-align:center; padding:58px 0 26px;}
+  .wordmark{
+    font-family:'Pirata One',serif; font-weight:400;
+    font-size:clamp(3rem,15vw,4.8rem); line-height:.9; margin:0;
+    color:var(--ink);
+    text-shadow:0 0 26px rgba(232,99,31,.34), 0 0 5px rgba(232,99,31,.22);
+  }
+  .tag{
+    margin-top:14px; font-family:'Oswald',sans-serif; font-weight:400;
+    text-transform:uppercase; letter-spacing:.42em; font-size:.74rem;
+    color:var(--ember); padding-left:.42em;
+  }
+  .lede{
+    margin:16px auto 0; max-width:34ch; color:var(--muted);
+    font-size:.94rem;
+  }
+  .wick{
+    width:64px; height:2px; margin:26px auto 0; border-radius:2px;
+    background:linear-gradient(90deg, transparent, var(--ember), transparent);
+    box-shadow:0 0 12px rgba(232,99,31,.5);
+  }
+
+  /* sections */
+  .section{margin-top:48px;}
+  .eyebrow{
+    font-family:'Oswald',sans-serif; font-weight:500;
+    text-transform:uppercase; letter-spacing:.2em; font-size:.7rem;
+    color:var(--ember);
+  }
+  .section-title{
+    font-family:'Oswald',sans-serif; font-weight:600;
+    text-transform:uppercase; letter-spacing:.03em;
+    font-size:clamp(1.45rem,6vw,1.85rem); line-height:1.05;
+    margin:5px 0 3px;
+  }
+  .section-sub{color:var(--muted); font-size:.85rem; margin:0 0 6px;}
+
+  /* items */
+  .item{padding:13px 0; border-bottom:1px solid var(--line);}
+  .item:last-child{border-bottom:none;}
+  .item-name{
+    font-weight:600; font-size:1.03rem; letter-spacing:.005em;
+    display:inline-flex; align-items:center; gap:7px;
+  }
+  .item-desc{color:var(--muted); font-size:.9rem; margin-top:3px;}
+  .flame{flex:0 0 auto; transform:translateY(-1px);}
+
+  /* featured */
+  .featured{
+    background:var(--surface); border:1px solid var(--line);
+    border-radius:12px; padding:16px 18px; margin:4px 0 14px;
+    position:relative; overflow:hidden;
+  }
+  .featured::before{
+    content:""; position:absolute; left:0; top:0; bottom:0; width:3px;
+    background:var(--ember); box-shadow:0 0 14px rgba(232,99,31,.55);
+  }
+  .featured .item-name{font-size:1.12rem;}
+  .featured .item-desc{margin-top:5px;}
+
+  /* compact rows (sauces/garnish/desserts/drinks) */
+  .rows{margin-top:4px;}
+  .row{padding:9px 0; border-bottom:1px solid var(--line); font-size:.96rem;}
+  .row:last-child{border-bottom:none;}
+  .row b{font-weight:600;}
+  .row span{color:var(--muted);}
+
+  /* footer */
+  .foot{margin-top:54px; padding-top:22px; border-top:1px solid var(--line); text-align:center;}
+  .foot .note{color:var(--muted); font-size:.86rem;}
+  .foot .meta{
+    margin-top:14px; font-family:'Oswald',sans-serif; font-weight:400;
+    text-transform:uppercase; letter-spacing:.22em; font-size:.72rem; color:var(--ink);
+  }
+  .foot .meta span{color:var(--ember);}
+
+  @media (prefers-reduced-motion: no-preference){
+    .wordmark{animation:flick 5s ease-in-out infinite;}
+    @keyframes flick{
+      0%,100%{text-shadow:0 0 26px rgba(232,99,31,.30), 0 0 5px rgba(232,99,31,.20);}
+      45%{text-shadow:0 0 34px rgba(232,99,31,.48), 0 0 7px rgba(232,99,31,.30);}
+      70%{text-shadow:0 0 22px rgba(232,99,31,.26), 0 0 5px rgba(232,99,31,.18);}
+    }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <h1 class="wordmark">Inferno</h1>
+    <div class="tag">lounge · bar · hookah</div>
+    <p class="lede">Закуски, кальян і спорт на великому екрані. Завітай відпочити — ми поруч.</p>
+    <div class="wick" aria-hidden="true"></div>
+  </header>
+
+  <section class="section" aria-labelledby="s-company">
+    <div class="eyebrow">На компанію</div>
+    <h2 class="section-title" id="s-company">Сети під спорт</h2>
+    <p class="section-sub">Великий стіл, довгий матч — береться одне, вистачає всім.</p>
+
+    <div class="featured">
+      <div class="item-name">Сет «Inferno»
+        <svg class="flame" width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2c1 4-2 5-3 8-1 2 0 4 2 4 2 0 3-2 2-4 3 2 5 5 5 8a7 7 0 1 1-14 0c0-5 6-7 8-16z" fill="#E8631F"/></svg>
+      </div>
+      <div class="item-desc">Крильця, стрипси, сирні палички, цибулеві кільця, грінки і три соуси.</div>
+    </div>
+
+    <div class="item">
+      <div class="item-name">М'ясне плато «Пекло»
+        <svg class="flame" width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2c1 4-2 5-3 8-1 2 0 4 2 4 2 0 3-2 2-4 3 2 5 5 5 8a7 7 0 1 1-14 0c0-5 6-7 8-16z" fill="#E8631F"/></svg>
+      </div>
+      <div class="item-desc">Крильця, реберця BBQ, курячий шашличок і ковбаски-гриль.</div>
+    </div>
+    <div class="item">
+      <div class="item-name">Лоадед-фрі</div>
+      <div class="item-desc">Фрі під розплавленим сиром, хрустким беконом і соусом.</div>
+    </div>
+    <div class="item">
+      <div class="item-name">Сирна тарілка</div>
+      <div class="item-desc">Асорті сирів, горішки і мед.</div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="s-mex">
+    <div class="eyebrow"><svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true" style="vertical-align:-2px;margin-right:7px"><circle cx="12" cy="12" r="10" fill="#ECE3D6"/><path d="M12 6.5l3.2 2.3-1.2 3.8h-4l-1.2-3.8z" fill="#1C1714"/><path d="M12 6.5V3M15.2 8.8l3.1-1M14 12.6l2 2.8M10 12.6l-2 2.8M8.8 8.8l-3.1-1" stroke="#1C1714" stroke-width="1.1" fill="none" stroke-linecap="round"/></svg>під ЧС-2026</div>
+    <h2 class="section-title" id="s-mex">Мексика</h2>
+    <p class="section-sub">Мексика приймає Чемпіонат світу — зібрали стіл під трансляції.</p>
+
+    <div class="item">
+      <div class="item-name">Начос «Пекельне полум'я»</div>
+      <div class="item-desc">Чипси тортілья під сирним соусом, халапеньйо і сальса.</div>
+    </div>
+    <div class="item">
+      <div class="item-name">Чилі кон карне</div>
+      <div class="item-desc">Гостре рагу з яловичини з квасолею, під начос.</div>
+    </div>
+    <div class="item">
+      <div class="item-name">Халапеньйо поппери</div>
+      <div class="item-desc">Перчики халапеньйо з сиром у хрусткому клярі.</div>
+    </div>
+    <div class="item">
+      <div class="item-name">Міні-тако</div>
+      <div class="item-desc">Три тортільї з куркою або яловичиною, сиром і сальсою.</div>
+    </div>
+    <div class="item">
+      <div class="item-name">Бурріто</div>
+      <div class="item-desc">Велика тортілья з м'ясом, сиром, овочами і соусом.</div>
+    </div>
+    <div class="item">
+      <div class="item-name">Кесаділья куряча</div>
+      <div class="item-desc">Тортілья, курка, розплавлений сир, сальса.</div>
+    </div>
+    <div class="item">
+      <div class="item-name">Кесаділья м'ясна</div>
+      <div class="item-desc">Яловичина, сир, халапеньйо.</div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="s-snacks">
+    <div class="eyebrow">До пива</div>
+    <h2 class="section-title" id="s-snacks">Снеки під кальян</h2>
+    <p class="section-sub">Те, що хочеться руками між затяжками.</p>
+
+    <div class="item">
+      <div class="item-name">Пекельні крильця
+        <svg class="flame" width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2c1 4-2 5-3 8-1 2 0 4 2 4 2 0 3-2 2-4 3 2 5 5 5 8a7 7 0 1 1-14 0c0-5 6-7 8-16z" fill="#E8631F"/></svg>
+      </div>
+      <div class="item-desc">Гострі, у фірмовому соусі. Не для слабких.</div>
+    </div>
+    <div class="item">
+      <div class="item-name">Крильця BBQ</div>
+      <div class="item-desc">Медово-копчені й липкі.</div>
+    </div>
+    <div class="item">
+      <div class="item-name">Курячі стрипси</div>
+      <div class="item-desc">У хрусткій паніровці, соус на вибір.</div>
+    </div>
+    <div class="item">
+      <div class="item-name">Сирні палички</div>
+      <div class="item-desc">Моцарела у клярі, кисло-солодкий соус.</div>
+    </div>
+    <div class="item">
+      <div class="item-name">Цибулеві кільця</div>
+      <div class="item-desc">Золотисті, з ранч-соусом.</div>
+    </div>
+    <div class="item">
+      <div class="item-name">Часникові грінки</div>
+      <div class="item-desc">Із сирним соусом.</div>
+    </div>
+    <div class="item">
+      <div class="item-name">Картопля по-селянськи</div>
+      <div class="item-desc">З паприкою і часником.</div>
+    </div>
+    <div class="item">
+      <div class="item-name">Фрі</div>
+      <div class="item-desc">Класика, соус на вибір.</div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="s-burgers">
+    <div class="eyebrow">У руку</div>
+    <h2 class="section-title" id="s-burgers">Бургери і сендвічі</h2>
+    <p class="section-sub">Гаряче, під яке не потрібні прибори.</p>
+
+    <div class="item">
+      <div class="item-name">Бургер «Inferno»
+        <svg class="flame" width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2c1 4-2 5-3 8-1 2 0 4 2 4 2 0 3-2 2-4 3 2 5 5 5 8a7 7 0 1 1-14 0c0-5 6-7 8-16z" fill="#E8631F"/></svg>
+      </div>
+      <div class="item-desc">Подвійна яловичина, чедер, бекон, гострий соус.</div>
+    </div>
+    <div class="item">
+      <div class="item-name">Чізбургер</div>
+      <div class="item-desc">Яловичина, плавлений чедер, овочі.</div>
+    </div>
+    <div class="item">
+      <div class="item-name">Чікен-бургер</div>
+      <div class="item-desc">Куряче філе в паніровці, соус ранч.</div>
+    </div>
+    <div class="item">
+      <div class="item-name">Рол у лаваші</div>
+      <div class="item-desc">Курка або яловичина, овочі, соус.</div>
+    </div>
+    <div class="item">
+      <div class="item-name">Клаб-сендвіч</div>
+      <div class="item-desc">Курка, бекон, овочі, тости.</div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="s-hot">
+    <div class="eyebrow">Ситніше</div>
+    <h2 class="section-title" id="s-hot">Гаряче</h2>
+    <p class="section-sub">Коли прийшли не перекусити, а поїсти.</p>
+
+    <div class="item">
+      <div class="item-name">Курячий шашличок</div>
+      <div class="item-desc">З овочами-гриль і соусом.</div>
+    </div>
+    <div class="item">
+      <div class="item-name">Реберця BBQ</div>
+      <div class="item-desc">Томлені, у липкій глазурі.</div>
+    </div>
+    <div class="item">
+      <div class="item-name">Куряче філе-гриль</div>
+      <div class="item-desc">З гарніром на вибір.</div>
+    </div>
+    <div class="item">
+      <div class="item-name">Ковбаски-гриль</div>
+      <div class="item-desc">Асорті, з картоплею і гірчицею.</div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="s-pasta">
+    <div class="eyebrow">З кухні</div>
+    <h2 class="section-title" id="s-pasta">Паста</h2>
+
+    <div class="item">
+      <div class="item-name">Паста болоньєзе</div>
+      <div class="item-desc">Спагеті, м'ясне рагу в томаті, пармезан.</div>
+    </div>
+    <div class="item">
+      <div class="item-name">Паста карбонара</div>
+      <div class="item-desc">Спагеті, бекон, вершковий соус, пармезан.</div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="s-salads">
+    <div class="eyebrow">Свіже</div>
+    <h2 class="section-title" id="s-salads">Салати</h2>
+
+    <div class="item">
+      <div class="item-name">Цезар з куркою</div>
+      <div class="item-desc">Класика, як треба.</div>
+    </div>
+    <div class="item">
+      <div class="item-name">Теплий салат з яловичиною</div>
+      <div class="item-desc">Мікс салату, яловичина, овочі.</div>
+    </div>
+    <div class="item">
+      <div class="item-name">Овочевий із сиром</div>
+      <div class="item-desc">Свіжі овочі і заправка.</div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="s-sides">
+    <div class="eyebrow">Додатки</div>
+    <h2 class="section-title" id="s-sides">Гарніри і соуси</h2>
+    <div class="rows">
+      <div class="row"><b>Гарніри.</b> <span>Фрі · картопля по-селянськи · овочі гриль</span></div>
+      <div class="row"><b>Соуси.</b> <span>Сирний · BBQ · часниковий · гострий · ранч · кисло-солодкий · сальса</span></div>
+      <div class="row"><b>Топінги.</b> <span>Сир · бекон · халапеньйо</span></div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="s-dessert">
+    <div class="eyebrow">До чаю і кальяну</div>
+    <h2 class="section-title" id="s-dessert">Десерти</h2>
+    <div class="rows">
+      <div class="row"><b>Чізкейк</b></div>
+      <div class="row"><b>Морозиво</b></div>
+      <div class="row"><b>Фруктова тарілка</b></div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="s-drinks">
+    <div class="eyebrow">Бар</div>
+    <h2 class="section-title" id="s-drinks">Напої</h2>
+    <p class="section-sub">Витяг — повну карту зберемо окремо.</p>
+    <div class="rows">
+      <div class="row"><b>Домашні лимонади.</b> <span>Глечик або келих</span></div>
+      <div class="row"><b>Чайники фруктового чаю.</b> <span>На компанію</span></div>
+      <div class="row"><b>Коктейлі.</b> <span>Класика та авторські «Inferno»</span></div>
+      <div class="row"><b>Пиво · Кава</b></div>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <div class="note">Ціни і повна карта напоїв — наступним кроком.</div>
+    <div class="meta">Inferno · 12:00<span>—</span>23:00 · 063 875 65 06</div>
+  </footer>
+
+</div>
+</body>
+</html>
