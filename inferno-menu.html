@@ -37,7 +37,7 @@
     background:radial-gradient(120% 140% at 80% 0%, rgba(232,99,31,.30), transparent 60%), var(--surface);
     border:1px solid var(--line);}
   .promo-card.has-img{background-size:cover; background-position:center;}
-  .promo-card .scrim{position:absolute; inset:0; background:linear-gradient(180deg, rgba(20,17,15,.15) 0%, rgba(20,17,15,.55) 55%, rgba(20,17,15,.9) 100%);}
+  .promo-card .scrim{position:absolute; inset:0; background:linear-gradient(180deg, rgba(20,17,15,.15) 0%, rgba(20,17,15,.55) 55%, rgba(20,17,15,.92) 100%);}
   .promo-card .glow{position:absolute; left:0; top:0; bottom:0; width:3px; background:var(--ember); box-shadow:0 0 16px rgba(232,99,31,.65); z-index:2;}
   .promo-card>*{position:relative; z-index:2;}
   .promo-badge{align-self:flex-start; font-family:'Oswald',sans-serif; text-transform:uppercase;
@@ -56,7 +56,7 @@
   .promo-pause{background:none; border:none; color:var(--muted); cursor:pointer; font-size:.9rem;
     line-height:1; padding:4px; -webkit-tap-highlight-color:transparent;}
 
-  /* ---------- collapsible top groups ---------- */
+  /* ---------- collapsible top groups (tabs) ---------- */
   .group{border-top:1px solid var(--line);}
   .group:last-of-type{border-bottom:1px solid var(--line);}
   .group>summary{list-style:none; cursor:pointer; display:flex; align-items:center; justify-content:space-between;
@@ -70,10 +70,26 @@
   .gcount{font-family:'Oswald',sans-serif; font-size:.82rem; letter-spacing:.08em;}
   .chev{flex:0 0 auto; color:var(--muted); transition:transform .25s ease, color .2s;}
   .group[open]>summary .chev{transform:rotate(180deg); color:var(--ember);}
-  .group-body{padding:0 0 26px;}
+  .group-body{padding:0 0 18px;}
 
-  /* sub-categories */
-  .subsec{margin-top:30px;}
+  /* ---------- nested sub-category accordion (2nd level, e.g. Кухня → Мексика) ---------- */
+  .subgroup{border-top:1px solid var(--line);}
+  .group-body>.subgroup:first-child{border-top:none;}
+  .subgroup>summary{list-style:none; cursor:pointer; display:flex; align-items:center; justify-content:space-between;
+    gap:12px; padding:16px 2px; -webkit-tap-highlight-color:transparent;}
+  .subgroup>summary::-webkit-details-marker{display:none;}
+  .subgroup>summary::marker{content:"";}
+  .sg-left{display:flex; flex-direction:column; gap:2px; min-width:0;}
+  .sg-eyebrow{font-family:'Oswald',sans-serif; font-weight:500; text-transform:uppercase; letter-spacing:.18em;
+    font-size:.62rem; color:var(--ember);}
+  .sg-title{font-family:'Oswald',sans-serif; font-weight:600; text-transform:uppercase; letter-spacing:.03em;
+    font-size:1.18rem; line-height:1.05; color:var(--ink); transition:color .2s;}
+  .subgroup[open]>summary .sg-title{color:var(--ember);}
+  .subgroup[open]>summary .chev{transform:rotate(180deg); color:var(--ember);}
+  .sg-body{padding:0 0 14px;}
+
+  /* sub-categories (single-level groups) */
+  .subsec{margin-top:24px;}
   .group-body>.subsec:first-child{margin-top:6px;}
   .eyebrow{font-family:'Oswald',sans-serif; font-weight:500; text-transform:uppercase; letter-spacing:.2em;
     font-size:.7rem; color:var(--ember); display:flex; align-items:center; gap:7px;}
@@ -154,7 +170,7 @@
   </main>
 
   <footer class="foot">
-    <div class="note">Ціни в гривнях. Кальян та повна карта бару — за окремою картою.</div>
+    <div class="note">Ціни в гривнях. Повна карта бару — за окремою картою.</div>
     <div class="meta">Inferno · 12:00<span>—</span>23:00 · 063 875 65 06</div>
     <div class="live" id="live" role="status" aria-live="polite"></div>
   </footer>
@@ -170,55 +186,64 @@
    Нижче — ЄДИНЕ, що ти редагуєш руками (оформлення й тексти):
      • CONFIG  — телефон, години, адреса джерела даних
      • PROMO   — банери-реклама зверху (гарячі пропозиції)
-     • GROUPS  — на які групи бити категорії та їх порядок
+     • IMG     — тематичні фото-заглушки (реальне фото з Poster — у пріоритеті)
+     • GROUPS  — вкладки і які категорії Poster у кожну входять + порядок
      • OVERLAY — описи страв і позначка «хіт» (🔥), за product_id з Poster
 
-   Опис прив'язаний до product_id, тому переживає перейменування у Poster.
-   Нова позиція в Poster з'явиться сама (без опису, поки не додаси його тут).
-   Нова КАТЕГОРІЯ в Poster, якої нема в GROUPS, з'явиться окремою групою вкінці.
-   Позиції з невідомою категорією потраплять у групу «Меню», щоб нічого не зникло.
+   Вкладка з кількома категоріями (напр. «Кухня») розкривається у ДВА кліки:
+     Кухня → вибір (Мексика / Снеки / …) → страви.
+   Нова категорія в Poster, якої нема в GROUPS, з'явиться окремою вкладкою.
+   Нова позиція з'явиться сама (без опису, поки не додаси його в OVERLAY).
    ════════════════════════════════════════════════════════════════════════ */
 
 const CONFIG = {
-  // Джерело живих даних (Cloudflare Worker, що ходить у Poster). Не чіпай без потреби.
-  source: "https://inferno-menu.infernobar.workers.dev/",
+  source: "https://inferno-menu.infernobar.workers.dev/",   // Worker, що ходить у Poster
   promoRotateMs: 5500,     // як часто гортати банери (0 = не гортати)
 };
 
-/* ── ПРОМО-БАНЕРИ ───────────────────────────────────────────────────────────
-   Реклама потрібних позицій / гарячих пропозицій. Гортаються автоматично.
-   id    — product_id з Poster (ціна підтягнеться жива). Можна не вказувати.
-   badge — мітка зверху (необов'язково)
-   title — заголовок (якщо порожньо й є id → візьметься назва страви)
-   sub   — підпис (якщо порожньо й є id → візьметься опис із OVERLAY)
-   image — фон-картинка https:// (необов'язково; інакше фірмовий градієнт,
-           або фото страви з Poster, якщо воно є)
-   Прибрати банери? Залиш порожній масив:  const PROMO = [];
-*/
+/* ── ПРОМО-БАНЕРИ (гарячі пропозиції) ──────────────────────────────────────
+   id=product_id з Poster (ціна жива). title/sub — необов'язкові (інакше з Poster/OVERLAY).
+   image — своя картинка https:// (інакше фото з Poster або тематична заглушка).
+   Прибрати банери:  const PROMO = []; */
 const PROMO = [
   { id: "172", badge: "🔥 Гарячий хіт", title: "Сет «Inferno»", sub: "Бере вся компанія — і вистачає всім." },
+  { id: "198", badge: "Дим вечора", title: "Кальян середній", sub: "Збалансована міцність — золота середина." },
   { id: "170", badge: "З вогню", title: "Реберця BBQ", sub: "Томлені, у липкій глазурі." },
-  { id: "142", badge: "Бар радить", title: "Еспресо Мартіні", sub: "Кава, що бадьорить до ранку." },
 ];
 
-/* ── ГРУПИ ──────────────────────────────────────────────────────────────────
-   Порядок груп і які категорії Poster у кожну входять (за назвою категорії).
-   Категорія Poster, якої тут нема, з'явиться окремою групою наприкінці.
-*/
+/* ── ФОТО ──────────────────────────────────────────────────────────────────
+   Реальне фото з Poster ЗАВЖДИ у пріоритеті. Якщо у позиції фото нема —
+   підставляється тематична заглушка за категорією (поки не заллєш своє в Poster).
+   enabled:false → лише реальні фото з Poster, без заглушок. */
+const IMG = {
+  enabled: true,
+  base: "https://loremflickr.com/240/240/",
+  kw: {
+    "Сети під спорт": "platter", "Мексика (під ЧС-2026)": "nachos", "Снеки під кальян": "wings",
+    "Бургери і сендвічі": "burger", "Гаряче": "grill", "Паста": "pasta", "Салати": "salad",
+    "Гарніри і соуси": "fries", "Десерти": "dessert", "Напої": "lemonade", "Коктейлі": "cocktail",
+    "Кальяни": "hookah", "Китайський чай": "tea",
+  },
+  fallback: "food",
+};
+
+/* ── ВКЛАДКИ ────────────────────────────────────────────────────────────────
+   Порядок вкладок і які категорії Poster у кожну входять (за назвою категорії).
+   Категорія Poster, якої тут нема, з'явиться окремою вкладкою наприкінці. */
 const GROUPS = [
   { name: "Кухня",   cats: ["Сети під спорт","Мексика (під ЧС-2026)","Снеки під кальян",
                             "Бургери і сендвічі","Гаряче","Паста","Салати","Гарніри і соуси"] },
   { name: "Бар",     cats: ["Коктейлі"] },
+  { name: "Кальяни", cats: ["Кальяни"] },
+  { name: "Чай",     cats: ["Китайський чай"] },
   { name: "Десерти", cats: ["Десерти"] },
   { name: "Напої",   cats: ["Напої"] },
 ];
 
 /* ── OVERLAY ────────────────────────────────────────────────────────────────
-   items: за product_id з Poster → { desc, hit, _name (підказка, що це) }
+   items: за product_id з Poster → { desc, hit, _name }
    cats:  за назвою категорії    → { eyebrow, subtitle }
-   Додати опис новій страві: знайди її product_id (див. підказку в консолі —
-   F12) і додай рядок:  "НОВИЙ_ID": { desc: "...", hit: true, _name: "Назва" },
-*/
+   Знайти product_id нової позиції: відкрий консоль (F12) — там підказка. */
 const OVERLAY = {
   "items": {
     "131": { "desc": "Апероль, просекко і содова — літня класика.", "_name": "Апероль Шприц" },
@@ -286,7 +311,14 @@ const OVERLAY = {
     "193": { "desc": "Куряче філе в паніровці, соус ранч.", "_name": "Чікен-бургер" },
     "194": { "desc": "Великий чайник фруктового чаю на компанію.", "_name": "Чайник фруктового чаю" },
     "195": { "desc": "Із сирним соусом.", "_name": "Часникові грінки" },
-    "196": { "desc": "Гостре рагу з яловичини з квасолею, під начос.", "_name": "Чилі кон карне" }
+    "196": { "desc": "Гостре рагу з яловичини з квасолею, під начос.", "_name": "Чилі кон карне" },
+    "197": { "desc": "Делікатний дим, м'який смак — для легкого вечора.", "_name": "Кальян легкий" },
+    "198": { "desc": "Збалансована міцність — золота середина.", "hit": true, "_name": "Кальян середній" },
+    "199": { "desc": "Щільний дим і міцний удар — для досвідчених.", "_name": "Кальян важкий" },
+    "200": { "desc": "Бірюзовий улун — квітковий, з медовим відлунням.", "_name": "Те Гуань Інь" },
+    "201": { "desc": "Витриманий чорний пуер — землистий, зігріває.", "hit": true, "_name": "Шу Пуер" },
+    "202": { "desc": "«Великий червоний халат» — насичений улун зі смаженою ноткою.", "_name": "Да Хун Пао" },
+    "203": { "desc": "Ніжний улун з вершково-молочним ароматом.", "_name": "Молочний улун" }
   },
   "cats": {
     "Сети під спорт":        { "eyebrow": "На компанію", "subtitle": "Великий стіл, довгий матч — береться одне, вистачає всім." },
@@ -299,7 +331,9 @@ const OVERLAY = {
     "Гарніри і соуси":       { "eyebrow": "Додатки", "subtitle": "" },
     "Десерти":               { "eyebrow": "До чаю і кальяну", "subtitle": "" },
     "Напої":                 { "eyebrow": "Бар", "subtitle": "Витяг — повну карту зберемо окремо." },
-    "Коктейлі":              { "eyebrow": "Бар · класика", "subtitle": "Класичні коктейлі на будь-який смак." }
+    "Коктейлі":              { "eyebrow": "Бар · класика", "subtitle": "Класичні коктейлі на будь-який смак." },
+    "Кальяни":               { "eyebrow": "Дим", "subtitle": "Легкий · середній · важкий — обери міцність." },
+    "Китайський чай":        { "eyebrow": "Чайна церемонія", "subtitle": "Улуни і пуер — чайник на компанію." }
   }
 };
 
@@ -309,7 +343,6 @@ const CACHE_KEY = "inferno_menu_cache_v1";
 const FLAME = '<svg class="flame" width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2c1 4-2 5-3 8-1 2 0 4 2 4 2 0 3-2 2-4 3 2 5 5 5 8a7 7 0 1 1-14 0c0-5 6-7 8-16z" fill="#E8631F"/></svg>';
 const CHEV  = '<svg class="chev" width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
-// Telegram Mini App: розгорнути на весь екран
 try { const T = window.Telegram && window.Telegram.WebApp; if (T) { T.ready(); T.expand && T.expand(); } } catch (e) {}
 
 const $ = (id) => document.getElementById(id);
@@ -331,15 +364,21 @@ function el(tag, props, kids){
   return n;
 }
 const safeImg = (u) => (typeof u === "string" && /^https:\/\//.test(u)) ? u : "";
-// фон у CSS url() — суворіше: жодних лапок/дужок/пробілів/; що дозволили б вирватися з url('...')
 const safeBgUrl = (u) => (typeof u === "string" && /^https:\/\//.test(u) && !/["'()\s;\\<>]/.test(u)) ? u : "";
 const money = (uah) => Math.round(Number(uah) || 0).toLocaleString("uk-UA") + " ₴";
 const meta = (id) => OVERLAY.items[String(id)] || {};
 const reduceMotion = () => !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+const kwFor = (catNm) => (IMG.kw && IMG.kw[catNm]) || IMG.fallback;
+function photoFor(p, catNm){
+  const real = safeImg(p.photo);
+  if (real) return real;
+  if (!IMG.enabled) return "";
+  return IMG.base + encodeURIComponent(kwFor(catNm)) + "?lock=" + encodeURIComponent(p.id);
+}
 
-let DATA = null;        // останній відрендерений набір
+let DATA = null;
 let promoTimer = null;
-let promoCtl = null;    // контролер карусели (stop/restart): пауза, коли вкладку згорнули
+let promoCtl = null;
 document.addEventListener("visibilitychange", () => { if (promoCtl) (document.hidden ? promoCtl.stop : promoCtl.restart)(); });
 
 function valid(d){ return !!d && !d.error && Array.isArray(d.products) && Array.isArray(d.categories); }
@@ -378,13 +417,11 @@ function renderError(){
 }
 
 function render(data, stale){
-  // продукти за категорією (id)
   const byCat = {};
   for (const p of data.products){
     if (!p) continue;
     (byCat[p.category_id] || (byCat[p.category_id] = [])).push(p);
   }
-  // id → назва; назва → [усі id з такою назвою] (дублі категорій не губляться)
   const catName = {}; const idsByName = {};
   for (const c of data.categories){
     catName[c.id] = c.name;
@@ -392,7 +429,6 @@ function render(data, stale){
   }
   const poolFor = (cn) => (idsByName[cn] || []).reduce((a, cid) => a.concat(byCat[cid] || []), []);
 
-  // згрупувати: спершу за GROUPS, потім невідомі категорії — окремими групами
   const used = new Set();
   const groups = [];
   for (const g of GROUPS){
@@ -406,7 +442,7 @@ function render(data, stale){
 
   const sortItems = (arr) => arr.slice().sort((a, b) =>
     (Number(a.sort) - Number(b.sort)) || (Number(a.id) - Number(b.id)));
-  const visible = (arr) => sortItems(arr).filter((p) => p && p.name);  // нічого не ховаємо, крім безіменних
+  const visible = (arr) => sortItems(arr).filter((p) => p && p.name);
 
   const m = $("menu"); m.innerHTML = "";
   let total = 0, rendered = 0;
@@ -414,7 +450,7 @@ function render(data, stale){
   const addGroup = (name, blocks, count) => {
     if (!blocks.length) return;
     rendered++; total += count;
-    const open = rendered === 1;     // перша непорожня група відкрита
+    const open = rendered === 1;
     m.appendChild(el("details", { class: "group", open: open ? "" : null }, [
       el("summary", null, [
         el("span", { class: "gname", text: name }),
@@ -425,17 +461,19 @@ function render(data, stale){
   };
 
   groups.forEach((g) => {
+    const present = g.cats.filter((cn) => visible(poolFor(cn)).length);
+    if (!present.length) return;
+    const multi = present.length > 1;            // >1 категорія → 2 рівні (Кухня → Мексика → страви)
     const blocks = []; let count = 0;
-    for (const cn of g.cats){
+    for (const cn of present){
       const items = visible(poolFor(cn));
-      if (!items.length) continue;
       count += items.length;
-      blocks.push(categoryBlock(cn, items));
+      blocks.push(multi ? subAccordion(cn, items) : categoryBlock(cn, items));
     }
     addGroup(g.name, blocks, count);
   });
 
-  // продукти без жодної відомої категорії — окрема група, щоб нічого не зникло
+  // продукти без жодної відомої категорії — окрема вкладка, щоб нічого не зникло
   const orphans = [];
   for (const cid in byCat){ if (!(cid in catName)) orphans.push.apply(orphans, byCat[cid]); }
   const orphanItems = visible(orphans);
@@ -447,21 +485,36 @@ function render(data, stale){
   renderLive(stale);
 }
 
+// 2-й рівень: підкатегорія як вкладений акордеон (Кухня → Мексика → страви)
+function subAccordion(catNm, items){
+  const cm = OVERLAY.cats[catNm] || {};
+  const body = [];
+  if (cm.subtitle) body.push(el("p", { class: "section-sub", text: cm.subtitle }));
+  for (const p of orderHits(items)) body.push(itemRow(p, catNm));
+  const left = el("span", { class: "sg-left" }, [
+    cm.eyebrow ? el("span", { class: "sg-eyebrow", text: cm.eyebrow }) : null,
+    el("span", { class: "sg-title", text: titleFor(catNm, cm.eyebrow) }),
+  ]);
+  const summary = el("summary", null, [
+    left,
+    el("span", { class: "gright", html: '<span class="gcount">' + items.length + '</span>' + CHEV }),
+  ]);
+  return el("details", { class: "subgroup" }, [summary, el("div", { class: "sg-body" }, body)]);
+}
+
+// 1 рівень: заголовок категорії + страви (для вкладок з однією категорією)
 function categoryBlock(catNm, items){
   const cm = OVERLAY.cats[catNm] || {};
   const kids = [];
   if (cm.eyebrow) kids.push(el("div", { class: "eyebrow", text: cm.eyebrow }));
   kids.push(el("h3", { class: "subsec-title", text: titleFor(catNm, cm.eyebrow) }));
   if (cm.subtitle) kids.push(el("p", { class: "section-sub", text: cm.subtitle }));
-  const feat = items.filter((p) => meta(p.id).hit);
-  const rest = items.filter((p) => !meta(p.id).hit);
-  for (const p of feat.concat(rest)) kids.push(itemRow(p));
+  for (const p of orderHits(items)) kids.push(itemRow(p, catNm));
   return el("div", { class: "subsec" }, kids);
 }
 
-// Заголовок: повна назва категорії, але якщо в дужках лежить той самий текст,
-// що й eyebrow (напр. «Мексика (під ЧС-2026)» + eyebrow «під ЧС-2026»), дужку прибираємо,
-// щоб не дублювати. Інші дужки (зміст!) лишаються.
+const orderHits = (items) => items.filter((p) => meta(p.id).hit).concat(items.filter((p) => !meta(p.id).hit));
+
 function titleFor(name, eyebrow){
   const eb = (eyebrow || "").trim();
   if (!eb) return name;
@@ -469,10 +522,10 @@ function titleFor(name, eyebrow){
   return name.replace(new RegExp("\\s*\\(\\s*" + esc + "\\s*\\)\\s*", "i"), " ").trim() || name;
 }
 
-function itemRow(p){
+function itemRow(p, catNm){
   const mt = meta(p.id);
   const hit = !!mt.hit;
-  const photo = safeImg(p.photo);
+  const photo = photoFor(p, catNm);
   const head = el("div", { class: "item-head" }, [
     el("span", { class: "item-name" }, [ p.name, hit ? frag(FLAME) : null ]),
     Number(p.price_uah) > 0 ? el("span", { class: "price", text: money(p.price_uah) }) : null,
@@ -487,7 +540,7 @@ function itemRow(p){
 
 function frag(svg){ const s = el("span"); s.innerHTML = svg; return s.firstChild; }
 
-// ексклюзивний акордеон: відкрита одна група, інші закриваються
+// ексклюзивний акордеон лише для ВКЛАДОК (верхній рівень); підкатегорії — незалежні
 function wireAccordion(){
   const all = document.querySelectorAll("details.group");
   all.forEach((d) => d.addEventListener("toggle", () => {
@@ -503,17 +556,19 @@ function renderPromo(data){
   const host = $("promo"); host.innerHTML = "";
   if (promoTimer){ clearInterval(promoTimer); promoTimer = null; }
   promoCtl = null;
-  const byId = {}; for (const p of data.products) byId[p.id] = p;
+  const byId = {}, cn = {};
+  for (const c of data.categories) cn[c.id] = c.name;
+  for (const p of data.products) byId[p.id] = p;
 
   const cards = [];
   for (const pr of (PROMO || [])){
     const prod = pr.id != null ? byId[String(pr.id)] : null;
-    if (pr.id != null && !prod) continue;            // позиції вже нема в Poster → пропускаємо
+    if (pr.id != null && !prod) continue;
     const mt = prod ? meta(prod.id) : {};
     const title = pr.title || (prod && prod.name) || "";
     const sub = pr.sub || mt.desc || "";
     if (!title) continue;
-    const img = safeBgUrl(pr.image) || (prod && safeBgUrl(prod.photo)) || "";
+    const img = safeBgUrl(pr.image) || (prod ? safeBgUrl(photoFor(prod, cn[prod.category_id])) : "");
     const price = prod && Number(prod.price_uah) > 0 ? money(prod.price_uah) : "";
     const card = el("div", {
       class: "promo-card" + (img ? " has-img" : ""),
@@ -537,7 +592,6 @@ function renderPromo(data){
   const track = el("div", { class: "promo-track" }, cards);
   const viewport = el("div", { class: "promo-viewport" }, [track]);
   host.appendChild(viewport);
-
   if (cards.length === 1) return;
 
   let idx = 0, paused = false;
@@ -547,9 +601,7 @@ function renderPromo(data){
   }));
   const pauseBtn = el("button", { class: "promo-pause", type: "button",
     "aria-label": "Пауза/відтворення", text: "⏸", onclick: togglePause });
-  host.appendChild(el("div", { class: "promo-ctrls" }, [
-    el("div", { class: "promo-dots" }, dots), pauseBtn,
-  ]));
+  host.appendChild(el("div", { class: "promo-ctrls" }, [ el("div", { class: "promo-dots" }, dots), pauseBtn ]));
 
   function go(i){
     idx = (i + cards.length) % cards.length;
@@ -566,10 +618,9 @@ function renderPromo(data){
 
   promoCtl = { stop, restart };
   go(0);
-  if (reduceMotion()){ paused = true; pauseBtn.textContent = "▶"; }   // не крутимо за reduced-motion
+  if (reduceMotion()){ paused = true; pauseBtn.textContent = "▶"; }
   restart();
 
-  // свайп + пауза на час дотику
   let x0 = null;
   viewport.addEventListener("touchstart", (e) => { x0 = e.touches[0].clientX; stop(); }, { passive: true });
   viewport.addEventListener("touchend", (e) => {
@@ -581,16 +632,19 @@ function renderPromo(data){
   });
 }
 
-// відкрити групу й підсвітити позицію (клік по банеру)
+// клік по банеру → відкрити вкладку (і підкатегорію) та підсвітити позицію
 function jumpTo(prod){
   const row = document.getElementById("p" + prod.id);
   if (!row) return;
-  const grp = row.closest("details.group");
-  if (grp && !grp.open) grp.open = true;
+  let node = row.parentElement;
+  while (node){
+    if (node.tagName === "DETAILS" && !node.open) node.open = true;
+    node = node.parentElement;
+  }
   setTimeout(() => {
     row.scrollIntoView({ behavior: "smooth", block: "center" });
     row.classList.remove("flash"); void row.offsetWidth; row.classList.add("flash");
-  }, 60);
+  }, 70);
 }
 
 function renderLive(stale){
