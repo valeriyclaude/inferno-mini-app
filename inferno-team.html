@@ -5,89 +5,85 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>Inferno · Команда</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.31.0/dist/tabler-icons.min.css">
 <style>
   :root{
-    --bg:#121013; --surface:#1a171c; --surface2:#221e25; --border:#2c2730;
-    --text:#ece5da; --muted:#9a9088; --gold:#d7b15c; --gold-soft:#3a3220;
-    --red:#d2433f; --red-soft:#3a1e1d; --green:#7fb98a; --green-soft:#1a2c1f;
-    --amber:#d9b15c; --amber-soft:#33290f; --gray-soft:#2a2730;
+    --bg:#19130f; --surface:#221a14; --surface2:#2a2018; --border:#33271e; --line:#2a2017;
+    --text:#efe7dd; --muted:#9b8d7e;
+    --bronze:#c87f4e; --bronze-soft:#2e1f16;
+    --gold:#c8a060; --gold-soft:#2a2218;
+    --red:#cf6a4f; --red-soft:#2e1c17;
+    --green:#9bbf86; --green-soft:#1f2a18;
     --serif:Georgia,'Times New Roman',serif;
   }
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   body{margin:0;background:var(--bg);color:var(--text);
-    font-family:-apple-system,'Segoe UI',Roboto,sans-serif;font-size:15px;line-height:1.4;
-    padding-bottom:64px}
-  header{position:sticky;top:0;z-index:5;background:#16121a;border-bottom:1px solid #322028;padding:13px 16px}
-  header .title{font-family:var(--serif);font-size:19px;letter-spacing:.3px}
-  header .title b{color:var(--gold);font-weight:normal}
-  header .sub{font-size:12px;color:var(--muted);margin-top:2px}
-  main{padding:10px 12px}
-  .secthead{display:flex;justify-content:space-between;align-items:center;margin:6px 2px 10px}
-  .secthead .lbl{font-size:12px;letter-spacing:1.2px;color:var(--muted);text-transform:uppercase}
-  .add{color:var(--gold);font-size:13px;background:none;border:1px solid var(--gold-soft);
-    border-radius:8px;padding:5px 10px}
-  .chips{display:flex;gap:7px;margin:0 2px 12px;flex-wrap:wrap}
-  .chip{font-size:12px;padding:5px 11px;border-radius:20px;border:1px solid var(--border);
-    color:var(--muted);background:var(--surface)}
-  .chip.on{color:#1a1208;background:var(--gold);border-color:var(--gold)}
-  .card{background:var(--surface);border:1px solid var(--border);border-radius:13px;
-    padding:11px 13px;margin-bottom:9px}
-  .card .top{display:flex;align-items:flex-start;gap:8px}
-  .card .ttl{font-size:14.5px;line-height:1.35}
-  .ic{font-size:15px;line-height:1.2;margin-top:1px}
-  .row2{display:flex;align-items:center;gap:8px;margin-top:9px;flex-wrap:wrap}
-  .badge{font-size:11px;padding:2px 9px;border-radius:7px}
+    font-family:-apple-system,'Segoe UI',Roboto,sans-serif;font-size:15px;line-height:1.4;padding-bottom:66px}
+  .ti{font-style:normal;line-height:1}
+  header{position:sticky;top:0;z-index:5;background:#1c150f;border-bottom:1px solid var(--line);
+    padding:15px 16px;display:flex;align-items:center;gap:11px}
+  .crest{width:36px;height:36px;border-radius:50%;border:1px solid #5a4226;display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+  .crest .ti{color:var(--bronze);font-size:20px}
+  header .h-ttl{font-family:var(--serif);font-size:18px;letter-spacing:.3px}
+  header .h-sub{font-size:12px;color:var(--muted);margin-top:1px}
+  main{padding:12px 12px}
+  .secthead{display:flex;justify-content:space-between;align-items:center;margin:2px 3px 11px}
+  .secthead .lbl{font-size:11px;letter-spacing:1.8px;color:var(--muted);text-transform:uppercase}
+  .add{color:var(--bronze);font-size:13px;background:none;border:1px solid #4a3320;border-radius:9px;
+    padding:6px 12px;display:flex;align-items:center;gap:5px}
+  .chips{display:flex;gap:8px;margin:0 3px 13px;flex-wrap:wrap}
+  .chip{font-size:12.5px;padding:6px 13px;border-radius:20px;border:1px solid var(--border);color:var(--muted);background:var(--surface)}
+  .chip.on{color:#1c130c;background:var(--bronze);border-color:var(--bronze)}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:12px 13px;margin-bottom:10px}
+  .card .top{display:flex;align-items:center;gap:11px}
+  . chipic,.cic{width:30px;height:30px;border-radius:9px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+  .cic .ti{font-size:16px}
+  .ttl{font-size:14.5px;line-height:1.35}
+  .row2{display:flex;align-items:center;gap:10px;margin-top:11px;flex-wrap:wrap}
+  .badge{font-size:11px;padding:3px 10px;border-radius:8px}
   .b-new{background:var(--green-soft);color:var(--green)}
-  .b-prog{background:var(--amber-soft);color:var(--amber)}
-  .b-fail{background:var(--red-soft);color:#e8918d}
-  .b-done{background:var(--gray-soft);color:var(--muted)}
-  .meta{color:var(--muted);font-size:12px;display:flex;align-items:center;gap:3px}
-  .meta.due{color:#cf9c5e;margin-left:auto}
-  /* calendar */
-  .calhead{display:flex;align-items:center;justify-content:space-between;margin:4px 4px 10px}
-  .calhead button{background:none;border:1px solid var(--border);color:var(--text);border-radius:8px;
-    width:34px;height:32px;font-size:16px}
+  .b-prog{background:var(--gold-soft);color:var(--gold)}
+  .b-fail{background:var(--red-soft);color:#e0937a}
+  .b-done{background:#241c15;color:var(--muted)}
+  .meta{color:var(--muted);font-size:12px;display:flex;align-items:center;gap:4px}
+  .meta.due{margin-left:auto}
+  .meta .ti{font-size:13px}
+  .calhead{display:flex;align-items:center;justify-content:space-between;margin:2px 4px 12px}
+  .calhead button{background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:9px;width:36px;height:34px;font-size:17px}
   .calhead .mon{font-family:var(--serif);font-size:17px}
   .cal{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
-  .cal .wd{font-size:11px;color:var(--muted);text-align:center;padding-bottom:2px}
-  .cal .day{background:var(--surface);border:1px solid var(--border);border-radius:9px;
-    min-height:46px;padding:5px 4px;font-size:13px;position:relative}
-  .cal .day.dim{opacity:.32}
-  .cal .day.today{border-color:var(--gold)}
-  .cal .day .n{color:var(--text)}
-  .cal .day .who{position:absolute;left:4px;right:4px;bottom:4px;font-size:9.5px;color:var(--gold);
-    overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
-  .cal .day .cnt{position:absolute;top:4px;right:5px;font-size:9px;color:#1a1208;background:var(--gold);
-    min-width:14px;height:14px;line-height:14px;border-radius:7px;text-align:center}
-  .todaybar{margin-top:14px;background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:11px 13px}
-  .todaybar .h{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
-  /* inbox */
-  .sg-actions{display:flex;gap:7px;margin-top:10px}
-  .sg-actions button{flex:1;border-radius:8px;padding:7px 0;font-size:12.5px;border:1px solid var(--border);background:var(--surface2);color:var(--text)}
-  .sg-actions .ok{border-color:var(--green-soft);color:var(--green)}
-  .sg-actions .no{border-color:var(--red-soft);color:#e8918d}
-  .from{color:var(--muted);font-size:12px;margin-top:5px}
-  .cat{color:var(--gold);font-size:11px;letter-spacing:.4px}
-  /* tabbar */
-  nav.tabbar{position:fixed;left:0;right:0;bottom:0;display:flex;background:#16121a;border-top:1px solid #322028}
-  nav.tabbar button{flex:1;background:none;border:none;color:var(--muted);padding:9px 0 8px;font-size:10.5px}
-  nav.tabbar button .ti{display:block;font-size:21px;margin-bottom:2px;font-style:normal}
-  nav.tabbar button.on{color:var(--gold)}
-  nav.tabbar button .dot{position:absolute;margin-left:9px;margin-top:-3px;background:var(--red);color:#fff;
-    font-size:9px;min-width:15px;height:15px;line-height:15px;border-radius:8px;display:inline-block}
+  .cal .wd{font-size:11px;color:var(--muted);text-align:center;padding-bottom:3px}
+  .cal .day{background:var(--surface);border:1px solid var(--border);border-radius:10px;min-height:48px;padding:5px 4px;font-size:13px;position:relative}
+  .cal .day.dim{opacity:.3}
+  .cal .day.today{border-color:var(--bronze)}
+  .cal .day .who{position:absolute;left:5px;right:5px;bottom:5px;font-size:9.5px;color:var(--bronze);overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+  .cal .day .cnt{position:absolute;top:4px;right:5px;font-size:9px;color:#1c130c;background:var(--bronze);min-width:15px;height:15px;line-height:15px;border-radius:8px;text-align:center}
+  .todaybar{margin-top:15px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 13px}
+  .todaybar .h{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px}
+  .sg-actions{display:flex;gap:8px;margin-top:11px}
+  .sg-actions button{flex:1;border-radius:9px;padding:8px 0;font-size:12.5px;border:1px solid var(--border);background:var(--surface2);color:var(--text);display:flex;align-items:center;justify-content:center;gap:5px}
+  .sg-actions .ok{border-color:#2d3a22;color:var(--green)}
+  .sg-actions .no{border-color:#3a241c;color:#e0937a}
+  .from{color:var(--muted);font-size:12px;margin-top:6px}
+  .cat{color:var(--bronze);font-size:11px;letter-spacing:.5px;text-transform:uppercase}
+  nav.tabbar{position:fixed;left:0;right:0;bottom:0;display:flex;background:#1c150f;border-top:1px solid var(--line)}
+  nav.tabbar button{flex:1;background:none;border:none;color:#776855;padding:9px 0 8px;font-size:10.5px}
+  nav.tabbar button .ti{display:block;font-size:21px;margin-bottom:3px}
+  nav.tabbar button.on{color:var(--bronze)}
+  nav.tabbar .dot{position:absolute;margin-left:10px;margin-top:-3px;background:var(--red);color:#fff;font-size:9px;min-width:15px;height:15px;line-height:15px;border-radius:8px}
   [hidden]{display:none!important}
-  .empty{color:var(--muted);text-align:center;padding:28px 0;font-size:13px}
+  .empty{color:var(--muted);text-align:center;padding:30px 0;font-size:13px}
 </style>
 </head>
 <body>
 <header>
-  <div class="title">🔥 <b>Inferno</b> · Команда</div>
-  <div class="sub" id="subline">5 активных задач · сегодня ты на смене</div>
+  <div class="crest"><i class="ti ti-flame" aria-hidden="true"></i></div>
+  <div><div class="h-ttl">Inferno · Команда</div><div class="h-sub" id="subline">5 активных задач · сегодня ты на смене</div></div>
 </header>
 
 <main>
   <section id="tab-tasks">
-    <div class="secthead"><span class="lbl">Задачи</span><button class="add">＋ новая</button></div>
+    <div class="secthead"><span class="lbl">Задачи</span><button class="add"><i class="ti ti-plus" aria-hidden="true"></i>новая</button></div>
     <div class="chips" id="taskchips">
       <span class="chip on" data-f="all">Все</span>
       <span class="chip" data-f="mine">На мне</span>
@@ -97,11 +93,9 @@
   </section>
 
   <section id="tab-shifts" hidden>
-    <div class="calhead">
-      <button id="pm">‹</button><span class="mon" id="mon"></span><button id="nm">›</button>
-    </div>
+    <div class="calhead"><button id="pm">‹</button><span class="mon" id="mon"></span><button id="nm">›</button></div>
     <div class="cal" id="cal"></div>
-    <div class="todaybar"><div class="h">Сегодня на смене</div><div id="todaywho" style="margin-top:6px"></div></div>
+    <div class="todaybar"><div class="h">Сегодня на смене</div><div id="todaywho" style="margin-top:7px"></div></div>
   </section>
 
   <section id="tab-inbox" hidden>
@@ -111,50 +105,51 @@
 </main>
 
 <nav class="tabbar">
-  <button class="on" data-t="tasks"><span class="ti">🗒️</span>Задачи</button>
-  <button data-t="shifts"><span class="ti">🗓️</span>Смены</button>
-  <button data-t="inbox"><span class="ti">📥</span>Входящие<span class="dot" id="inboxdot">3</span></button>
+  <button class="on" data-t="tasks"><i class="ti ti-checklist" aria-hidden="true"></i>Задачи</button>
+  <button data-t="shifts"><i class="ti ti-calendar" aria-hidden="true"></i>Смены</button>
+  <button data-t="inbox"><i class="ti ti-inbox" aria-hidden="true"></i>Входящие<span class="dot" id="inboxdot">3</span></button>
 </nav>
 
 <script>
 const tg = window.Telegram && window.Telegram.WebApp;
-if (tg){ tg.ready(); tg.expand(); try{tg.setHeaderColor('#16121a'); tg.setBackgroundColor('#121013');}catch(e){} }
+if (tg){ tg.ready(); tg.expand(); try{tg.setHeaderColor('#1c150f'); tg.setBackgroundColor('#19130f');}catch(e){} }
 
-/* ---- ДЕМО-ДАННЫЕ (позже заменим на запрос к API) ---- */
 const ME = "Данил";
 const TASKS = [
   {id:7, title:"Сломалась вытяжка в кальянной", pri:"urgent", st:"not_done", who:"Данил", due:"сегодня 22:00"},
   {id:6, title:"Помыть колбы и чаши", pri:"normal", st:"in_progress", who:"Данил", due:"до 18:00"},
-  {id:5, title:"🛒 Кухня · Продукты: лимоны, масло", pri:"normal", st:"new", who:"тебе"},
+  {id:5, title:"Кухня · Продукты: лимоны, масло", kind:"supply", st:"new", who:"тебе"},
   {id:4, title:"Сделать сторис про новый кальян", pri:"normal", st:"new", who:"СММ", due:"завтра 14:00"},
   {id:3, title:"Принять поставку бара", pri:"normal", st:"done", who:"Данил"},
 ];
 const ST = {new:["новая","b-new"], in_progress:["в работе","b-prog"], not_done:["не сделано","b-fail"], done:["готово","b-done"]};
-const SHIFTS = { 1:["Данил"], 2:["Данил"], 3:["Данил","K V"], 4:["Данил"], 5:["K V"], 6:["Данил"], 7:["Данил"] };
+const SHIFTS = { 1:["Данил"],2:["Данил"],3:["Данил","K V"],4:["Данил"],5:["K V"],6:["Данил"],7:["Данил"] };
 const SUGS = [
-  {cat:"🍸 Бар · Коктейль", author:"Данил", text:"добавить авторский глинтвейн на осень"},
-  {cat:"🎬 Медиа · Reels", author:"СММ", text:"снять рилс про дым-шоу на баре"},
+  {cat:"Бар · Коктейль", author:"Данил", text:"добавить авторский глинтвейн на осень"},
+  {cat:"Медиа · Reels", author:"СММ", text:"снять рилс про дым-шоу на баре"},
 ];
 const SUPPLY = [{id:5, text:"Кухня · Продукты: лимоны, масло", who:"тебе"}];
 
-/* ---- РЕНДЕР ЗАДАЧ ---- */
-function priIcon(t){ return t.pri==="urgent" ? '<span class="ic" style="color:var(--red)">🔥</span>'
-  : t.title.startsWith("🛒") ? '<span class="ic" style="color:var(--green)">🛒</span>'
-  : '<span class="ic" style="color:var(--gold)">•</span>'; }
+function icon(t){
+  if(t.kind==="supply") return ['ti-shopping-cart','var(--green)'];
+  if(t.pri==="urgent") return ['ti-flame','var(--red)'];
+  return ['ti-point','var(--bronze)'];
+}
 function taskCard(t){
-  const [lbl,cls]=ST[t.st];
-  const due = t.due ? `<span class="meta due">⏰ ${t.due}</span>` : "";
-  const title = t.title.replace(/^🛒\s*/,"");
-  return `<div class="card"><div class="top">${priIcon(t)}<span class="ttl">${title}</span></div>
+  const [lbl,cls]=ST[t.st]; const [ic,col]=icon(t);
+  const due = t.due ? `<span class="meta due"><i class="ti ti-clock" aria-hidden="true"></i>${t.due}</span>` : "";
+  return `<div class="card"><div class="top">
+      <div class="cic"><i class="ti ${ic}" style="color:${col}" aria-hidden="true"></i></div>
+      <span class="ttl">${t.title}</span></div>
     <div class="row2"><span class="badge ${cls}">${lbl}</span>
-    <span class="meta">👤 ${t.who}</span>${due}</div></div>`;
+    <span class="meta"><i class="ti ti-user" aria-hidden="true"></i>${t.who}</span>${due}</div></div>`;
 }
 let filter="all";
 function renderTasks(){
   let list = TASKS.filter(t=>t.st!=="done"||filter==="all");
   if(filter==="mine") list=list.filter(t=>t.who==="тебе"||t.who===ME);
   if(filter==="urgent") list=list.filter(t=>t.pri==="urgent");
-  document.getElementById("tasklist").innerHTML = list.length?list.map(taskCard).join(""):'<div class="empty">Пусто 🔥</div>';
+  document.getElementById("tasklist").innerHTML = list.length?list.map(taskCard).join(""):'<div class="empty">Пусто</div>';
 }
 document.getElementById("taskchips").onclick=e=>{
   const c=e.target.closest(".chip"); if(!c)return;
@@ -162,7 +157,6 @@ document.getElementById("taskchips").onclick=e=>{
   c.classList.add("on"); filter=c.dataset.f; renderTasks();
 };
 
-/* ---- РЕНДЕР КАЛЕНДАРЯ СМЕН ---- */
 const MN=["Январь","Февраль","Март","Апрель","Май","Июнь","Июль","Август","Сентябрь","Октябрь","Ноябрь","Декабрь"];
 const WD=["Пн","Вт","Ср","Чт","Пт","Сб","Вс"];
 let view=new Date(); view.setDate(1);
@@ -174,36 +168,33 @@ function renderCal(){
   const days=new Date(y,m+1,0).getDate();
   for(let i=0;i<first;i++) html+='<div></div>';
   for(let d=1;d<=days;d++){
-    const isToday = y===now.getFullYear()&&m===now.getMonth()&&d===now.getDate();
-    const past = new Date(y,m,d) < new Date(now.getFullYear(),now.getMonth(),now.getDate());
-    const ppl = (m===now.getMonth()&&y===now.getFullYear()) ? (SHIFTS[d]||[]) : [];
-    const cnt = ppl.length?`<span class="cnt">${ppl.length}</span>`:"";
-    const who = ppl.length?`<span class="who">${ppl.join(", ")}</span>`:"";
-    html+=`<div class="day ${past?'dim':''} ${isToday?'today':''}"><span class="n">${d}</span>${cnt}${who}</div>`;
+    const isToday=y===now.getFullYear()&&m===now.getMonth()&&d===now.getDate();
+    const past=new Date(y,m,d)<new Date(now.getFullYear(),now.getMonth(),now.getDate());
+    const ppl=(m===now.getMonth()&&y===now.getFullYear())?(SHIFTS[d]||[]):[];
+    const cnt=ppl.length?`<span class="cnt">${ppl.length}</span>`:"";
+    const who=ppl.length?`<span class="who">${ppl.join(", ")}</span>`:"";
+    html+=`<div class="day ${past?'dim':''} ${isToday?'today':''}"><span>${d}</span>${cnt}${who}</div>`;
   }
   document.getElementById("cal").innerHTML=html;
   const td=SHIFTS[now.getDate()]||[];
-  document.getElementById("todaywho").innerHTML = td.length?td.map(n=>`👤 ${n}`).join("  "):'<span class="meta">никого</span>';
+  document.getElementById("todaywho").innerHTML = td.length?td.map(n=>`<span class="meta" style="display:inline-flex;margin-right:12px"><i class="ti ti-user" aria-hidden="true"></i>${n}</span>`).join(""):'<span class="meta">никого</span>';
 }
 document.getElementById("pm").onclick=()=>{view.setMonth(view.getMonth()-1);renderCal();};
 document.getElementById("nm").onclick=()=>{view.setMonth(view.getMonth()+1);renderCal();};
 
-/* ---- РЕНДЕР ВХОДЯЩИХ ---- */
 function renderInbox(){
-  let h="";
-  h+=SUGS.map(s=>`<div class="card"><div class="cat">${s.cat}</div>
-    <div class="ttl" style="margin-top:4px">${s.text}</div>
+  let h=SUGS.map(s=>`<div class="card"><div class="cat">${s.cat}</div>
+    <div class="ttl" style="margin-top:5px">${s.text}</div>
     <div class="from">от ${s.author}</div>
-    <div class="sg-actions"><button class="ok">✓ Принять</button><button class="no">✕ Отклонить</button><button>💬 Ответить</button></div>
+    <div class="sg-actions"><button class="ok"><i class="ti ti-check" aria-hidden="true"></i>Принять</button><button class="no"><i class="ti ti-x" aria-hidden="true"></i>Отклонить</button><button><i class="ti ti-message-2" aria-hidden="true"></i></button></div>
     </div>`).join("");
   if(SUPPLY.length){
-    h+=`<div class="secthead" style="margin-top:16px"><span class="lbl">Заявки на закупку</span></div>`;
-    h+=SUPPLY.map(x=>`<div class="card"><div class="top"><span class="ic" style="color:var(--green)">🛒</span><span class="ttl">${x.text}</span></div><div class="row2"><span class="meta">в задачах · ${x.who}</span></div></div>`).join("");
+    h+=`<div class="secthead" style="margin-top:17px"><span class="lbl">Заявки на закупку</span></div>`;
+    h+=SUPPLY.map(x=>`<div class="card"><div class="top"><div class="cic"><i class="ti ti-shopping-cart" style="color:var(--green)" aria-hidden="true"></i></div><span class="ttl">${x.text}</span></div><div class="row2"><span class="meta">в задачах · ${x.who}</span></div></div>`).join("");
   }
-  document.getElementById("inboxlist").innerHTML=h||'<div class="empty">Входящих нет 🔥</div>';
+  document.getElementById("inboxlist").innerHTML=h||'<div class="empty">Входящих нет</div>';
 }
 
-/* ---- ВКЛАДКИ ---- */
 document.querySelector("nav.tabbar").onclick=e=>{
   const b=e.target.closest("button[data-t]"); if(!b)return;
   document.querySelectorAll("nav.tabbar button").forEach(x=>x.classList.remove("on"));
@@ -212,7 +203,6 @@ document.querySelector("nav.tabbar").onclick=e=>{
   if(b.dataset.t==="shifts") renderCal();
   if(b.dataset.t==="inbox") renderInbox();
 };
-
 renderTasks();
 </script>
 </body>
