@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#14110F">
+<title>Inferno — меню</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Oswald:wght@300;400;500;600&family=Pirata+One&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#14110F; --surface:#1C1714; --line:#2C2420; --ink:#ECE3D6; --muted:#9C8E7C; --ember:#E8631F; --blood:#C01E10;}
+  *{box-sizing:border-box;}
+  html{-webkit-text-size-adjust:100%; scroll-behavior:smooth;}
+  body{margin:0; background:var(--bg); color:var(--ink);
+    font-family:'Manrope',system-ui,sans-serif; line-height:1.5; -webkit-font-smoothing:antialiased;}
+  .wrap{max-width:700px; margin:0 auto;
+    padding:0 max(22px, env(safe-area-inset-right)) calc(64px + env(safe-area-inset-bottom)) max(22px, env(safe-area-inset-left));}
+  a{color:inherit;}
+
+  /* hero */
+  .hero{text-align:center; padding:46px 0 8px;}
+  .wordmark{font-family:'Pirata One',serif; font-weight:400; font-size:clamp(3rem,15vw,4.8rem);
+    line-height:.9; margin:0; color:var(--ink); text-shadow:0 0 26px rgba(232,99,31,.34), 0 0 5px rgba(232,99,31,.22);}
+  .tag{margin-top:14px; font-family:'Oswald',sans-serif; text-transform:uppercase; letter-spacing:.42em;
+    font-size:.74rem; color:var(--ember); padding-left:.42em;}
+  .lede{margin:14px auto 0; max-width:34ch; color:var(--muted); font-size:.94rem;}
+  .wick{width:64px; height:2px; margin:22px auto 4px; border-radius:2px;
+    background:linear-gradient(90deg, transparent, var(--ember), transparent); box-shadow:0 0 12px rgba(232,99,31,.5);}
+
+  /* ---------- PROMO banner / carousel ---------- */
+  .promo{position:relative; margin:18px 0 6px; min-height:1px;}
+  .promo-viewport{overflow:hidden; border-radius:16px;}
+  .promo-track{display:flex; transition:transform .45s cubic-bezier(.4,0,.2,1);}
+  .promo-card{flex:0 0 100%; position:relative; min-height:150px; display:flex; flex-direction:column;
+    justify-content:flex-end; padding:18px 20px; color:#fff; overflow:hidden; cursor:pointer;
+    background:radial-gradient(120% 140% at 80% 0%, rgba(232,99,31,.30), transparent 60%), var(--surface);
+    border:1px solid var(--line);}
+  .promo-card.has-img{background-size:cover; background-position:center;}
+  .promo-card .scrim{position:absolute; inset:0; background:linear-gradient(180deg, rgba(20,17,15,.15) 0%, rgba(20,17,15,.55) 55%, rgba(20,17,15,.92) 100%);}
+  .promo-card .glow{position:absolute; left:0; top:0; bottom:0; width:3px; background:var(--ember); box-shadow:0 0 16px rgba(232,99,31,.65); z-index:2;}
+  .promo-card>*{position:relative; z-index:2;}
+  .promo-badge{align-self:flex-start; font-family:'Oswald',sans-serif; text-transform:uppercase;
+    letter-spacing:.14em; font-size:.66rem; font-weight:600; color:#fff; background:var(--ember);
+    padding:4px 10px; border-radius:999px; margin-bottom:auto; box-shadow:0 2px 12px rgba(232,99,31,.45);}
+  .promo-title{font-family:'Oswald',sans-serif; font-weight:600; text-transform:uppercase; letter-spacing:.02em;
+    font-size:clamp(1.4rem,6vw,1.9rem); line-height:1.05; margin:12px 0 2px; text-shadow:0 2px 14px rgba(0,0,0,.6);}
+  .promo-sub{font-size:.9rem; color:#E9DECF; max-width:42ch; text-shadow:0 1px 8px rgba(0,0,0,.6);}
+  .promo-price{margin-top:9px; font-family:'Oswald',sans-serif; font-weight:600; font-size:1.18rem; color:#fff;}
+  .promo-price b{color:#FFD9B0;}
+  .promo-ctrls{display:flex; align-items:center; justify-content:center; gap:12px; margin-top:12px;}
+  .promo-dots{display:flex; gap:7px;}
+  .promo-dots button{width:7px; height:7px; padding:0; border:none; border-radius:50%; cursor:pointer;
+    background:var(--line); transition:background .2s, transform .2s;}
+  .promo-dots button[aria-current="true"]{background:var(--ember); transform:scale(1.25);}
+  .promo-pause{background:none; border:none; color:var(--muted); cursor:pointer; font-size:.9rem;
+    line-height:1; padding:4px; -webkit-tap-highlight-color:transparent;}
+
+  /* ---------- collapsible top groups (tabs) ---------- */
+  .group{border-top:1px solid var(--line);}
+  .group:last-of-type{border-bottom:1px solid var(--line);}
+  .group>summary{list-style:none; cursor:pointer; display:flex; align-items:center; justify-content:space-between;
+    gap:14px; padding:24px 2px; scroll-margin-top:10px; -webkit-tap-highlight-color:transparent;}
+  .group>summary::-webkit-details-marker{display:none;}
+  .group>summary::marker{content:"";}
+  .gname{font-family:'Oswald',sans-serif; font-weight:600; text-transform:uppercase; letter-spacing:.04em;
+    font-size:clamp(1.55rem,7vw,2.1rem); line-height:1; color:var(--ink); transition:color .2s;}
+  .group[open]>summary .gname{color:var(--ember);}
+  .gright{display:inline-flex; align-items:center; gap:12px; color:var(--muted);}
+  .gcount{font-family:'Oswald',sans-serif; font-size:.82rem; letter-spacing:.08em;}
+  .chev{flex:0 0 auto; color:var(--muted); transition:transform .25s ease, color .2s;}
+  .group[open]>summary .chev{transform:rotate(180deg); color:var(--ember);}
+  .group-body{padding:0 0 18px;}
+
+  /* ---------- nested sub-category accordion (2nd level, e.g. Кухня → Мексика) ---------- */
+  .subgroup{border-top:1px solid var(--line);}
+  .group-body>.subgroup:first-child{border-top:none;}
+  .subgroup>summary{list-style:none; cursor:pointer; display:flex; align-items:center; justify-content:space-between;
+    gap:12px; padding:16px 2px; -webkit-tap-highlight-color:transparent;}
+  .subgroup>summary::-webkit-details-marker{display:none;}
+  .subgroup>summary::marker{content:"";}
+  .sg-left{display:flex; flex-direction:column; gap:2px; min-width:0;}
+  .sg-eyebrow{font-family:'Oswald',sans-serif; font-weight:500; text-transform:uppercase; letter-spacing:.18em;
+    font-size:.62rem; color:var(--ember);}
+  .sg-title{font-family:'Oswald',sans-serif; font-weight:600; text-transform:uppercase; letter-spacing:.03em;
+    font-size:1.18rem; line-height:1.05; color:var(--ink); transition:color .2s;}
+  .subgroup[open]>summary .sg-title{color:var(--ember);}
+  .subgroup[open]>summary .chev{transform:rotate(180deg); color:var(--ember);}
+  .sg-body{padding:0 0 14px;}
+
+  /* sub-categories (single-level groups) */
+  .subsec{margin-top:24px;}
+  .group-body>.subsec:first-child{margin-top:6px;}
+  .eyebrow{font-family:'Oswald',sans-serif; font-weight:500; text-transform:uppercase; letter-spacing:.2em;
+    font-size:.7rem; color:var(--ember); display:flex; align-items:center; gap:7px;}
+  .subsec-title{font-family:'Oswald',sans-serif; font-weight:600; text-transform:uppercase; letter-spacing:.03em;
+    font-size:clamp(1.25rem,5.2vw,1.55rem); line-height:1.05; margin:5px 0 3px;}
+  .section-sub{color:var(--muted); font-size:.85rem; margin:0 0 6px;}
+
+  /* items */
+  .item{padding:13px 0; border-bottom:1px solid var(--line); display:flex; gap:14px; align-items:flex-start;
+    scroll-margin-top:14px;}
+  .item:last-child{border-bottom:none;}
+  .ibody{flex:1 1 auto; min-width:0;}
+  .thumb{width:74px; height:74px; border-radius:10px; object-fit:cover; flex:0 0 auto; background:var(--surface);}
+  .featured .thumb{width:92px; height:92px;}
+  .item-head{display:flex; justify-content:space-between; align-items:baseline; gap:14px;}
+  .item-name{font-weight:600; font-size:1.03rem; letter-spacing:.005em; display:inline-flex; align-items:center; gap:7px; flex:1 1 auto; min-width:0; overflow-wrap:anywhere;}
+  .price{font-family:'Oswald',sans-serif; font-weight:500; font-size:1rem; color:var(--ember); white-space:nowrap; letter-spacing:.02em;}
+  .item-desc{color:var(--muted); font-size:.9rem; margin-top:3px;}
+  .flame{flex:0 0 auto; transform:translateY(-1px);}
+  .featured{background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:16px 18px;
+    margin:10px 0 14px; position:relative; overflow:hidden; display:flex; gap:14px; align-items:flex-start;}
+  .featured::before{content:""; position:absolute; left:0; top:0; bottom:0; width:3px;
+    background:var(--ember); box-shadow:0 0 14px rgba(232,99,31,.55);}
+  .featured .item-name{font-size:1.12rem;}
+  .featured .price{font-size:1.08rem;}
+  .featured .item-desc{margin-top:5px;}
+
+  .flash{animation:flash 1.6s ease;}
+  @keyframes flash{0%,100%{background:transparent;} 18%{background:rgba(232,99,31,.12);}}
+
+  /* states */
+  .state{padding:60px 0; text-align:center; color:var(--muted);}
+  .spinner{width:34px; height:34px; margin:0 auto 16px; border-radius:50%;
+    border:3px solid var(--line); border-top-color:var(--ember); animation:spin .9s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .retry{margin-top:16px; font-family:'Oswald',sans-serif; text-transform:uppercase; letter-spacing:.08em;
+    font-size:.8rem; color:var(--ink); background:var(--surface); border:1px solid var(--line);
+    border-radius:999px; padding:10px 22px; cursor:pointer;}
+  .skel{height:58px; border-bottom:1px solid var(--line); position:relative; overflow:hidden;}
+  .skel::after{content:""; position:absolute; inset:0; transform:translateX(-100%);
+    background:linear-gradient(90deg, transparent, rgba(236,227,214,.05), transparent); animation:sweep 1.3s infinite;}
+  @keyframes sweep{100%{transform:translateX(100%);}}
+
+  /* footer */
+  .foot{margin-top:46px; padding-top:22px; border-top:1px solid var(--line); text-align:center;}
+  .foot .note{color:var(--muted); font-size:.86rem;}
+  .foot .meta{margin-top:14px; font-family:'Oswald',sans-serif; text-transform:uppercase; letter-spacing:.22em;
+    font-size:.72rem; color:var(--ink);}
+  .foot .meta span{color:var(--ember);}
+  .foot .live{margin-top:14px; font-size:.74rem; color:var(--muted); display:inline-flex; align-items:center; gap:7px;}
+  .dot{width:7px; height:7px; border-radius:50%; background:#3FB36B; box-shadow:0 0 8px rgba(63,179,107,.7);}
+  .dot.stale{background:var(--muted); box-shadow:none;}
+
+  @media (prefers-reduced-motion: no-preference){
+    .wordmark{animation:flick 5s ease-in-out infinite;}
+    @keyframes flick{0%,100%{text-shadow:0 0 26px rgba(232,99,31,.30), 0 0 5px rgba(232,99,31,.20);}
+      45%{text-shadow:0 0 34px rgba(232,99,31,.48), 0 0 7px rgba(232,99,31,.30);}
+      70%{text-shadow:0 0 22px rgba(232,99,31,.26), 0 0 5px rgba(232,99,31,.18);}}}
+  @media (prefers-reduced-motion: reduce){.promo-track{transition:none;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="hero">
+    <h1 class="wordmark">Inferno</h1>
+    <div class="tag">lounge · bar · hookah</div>
+    <p class="lede">Закуски, кальян і спорт на великому екрані. Обери розділ — і меню розкриється.</p>
+    <div class="wick" aria-hidden="true"></div>
+  </header>
+
+  <!-- промо-баннер (керується у блоці PROMO нижче) -->
+  <section class="promo" id="promo" aria-label="Гарячі пропозиції"></section>
+
+  <!-- меню підтягується з Poster -->
+  <main id="menu">
+    <div class="state"><div class="spinner"></div>Завантажуємо меню…</div>
+    <div class="skel"></div><div class="skel"></div><div class="skel"></div><div class="skel"></div>
+  </main>
+
+  <footer class="foot">
+    <div class="note">Ціни в гривнях. Повна карта бару — за окремою картою.</div>
+    <div class="meta">Inferno · 12:00<span>—</span>23:00 · 063 875 65 06</div>
+    <div class="live" id="live" role="status" aria-live="polite"></div>
+  </footer>
+</div>
+
+<script>
+/* ════════════════════════════════════════════════════════════════════════
+   INFERNO · ЖИВЕ МЕНЮ
+   ─────────────────────────────────────────────────────────────────────────
+   Дані (категорії, страви, ЦІНИ, фото) тягнуться НАЖИВО з Poster.
+   Міняєш ціну/додаєш позицію в Poster → тут оновлюється саме (до ~1 хв).
+
+   Нижче — ЄДИНЕ, що ти редагуєш руками (оформлення й тексти):
+     • CONFIG  — телефон, години, адреса джерела даних
+     • PROMO   — банери-реклама зверху (гарячі пропозиції)
+     • IMG     — тематичні фото-заглушки (реальне фото з Poster — у пріоритеті)
+     • GROUPS  — вкладки і які категорії Poster у кожну входять + порядок
+     • OVERLAY — описи страв і позначка «хіт» (🔥), за product_id з Poster
+
+   Вкладка з кількома категоріями (напр. «Кухня») розкривається у ДВА кліки:
+     Кухня → вибір (Мексика / Снеки / …) → страви.
+   Нова категорія в Poster, якої нема в GROUPS, з'явиться окремою вкладкою.
+   Нова позиція з'явиться сама (без опису, поки не додаси його в OVERLAY).
+   ════════════════════════════════════════════════════════════════════════ */
+
+const CONFIG = {
+  source: "https://inferno-menu.infernobar.workers.dev/",   // Worker, що ходить у Poster
+  promoRotateMs: 5500,     // як часто гортати банери (0 = не гортати)
+};
+
+/* ── ПРОМО-БАНЕРИ (гарячі пропозиції) ──────────────────────────────────────
+   id=product_id з Poster (ціна жива). title/sub — необов'язкові (інакше з Poster/OVERLAY).
+   image — своя картинка https:// (інакше фото з Poster або тематична заглушка).
+   Прибрати банери:  const PROMO = []; */
+const PROMO = [
+  { id: "172", badge: "🔥 Гарячий хіт", title: "Сет «Inferno»", sub: "Бере вся компанія — і вистачає всім." },
+  { id: "198", badge: "Дим вечора", title: "Кальян середній", sub: "Збалансована міцність — золота середина." },
+  { id: "170", badge: "З вогню", title: "Реберця BBQ", sub: "Томлені, у липкій глазурі." },
+];
+
+/* ── ФОТО ──────────────────────────────────────────────────────────────────
+   Реальне фото з Poster ЗАВЖДИ у пріоритеті. Якщо у позиції фото нема —
+   підставляється тематична заглушка за категорією (поки не заллєш своє в Poster).
+   enabled:false → лише реальні фото з Poster, без заглушок. */
+const IMG = {
+  enabled: true,
+  base: "https://loremflickr.com/240/240/",
+  kw: {
+    "Сети під спорт": "platter", "Мексика (під ЧС-2026)": "nachos", "Снеки під кальян": "wings",
+    "Бургери і сендвічі": "burger", "Гаряче": "grill", "Паста": "pasta", "Салати": "salad",
+    "Гарніри і соуси": "fries", "Десерти": "dessert", "Напої": "lemonade", "Коктейлі": "cocktail",
+    "Кальяни": "hookah", "Китайський чай": "tea",
+  },
+  fallback: "food",
+};
+
+/* ── ВКЛАДКИ ────────────────────────────────────────────────────────────────
+   Порядок вкладок і які категорії Poster у кожну входять (за назвою категорії).
+   Категорія Poster, якої тут нема, з'явиться окремою вкладкою наприкінці. */
+const GROUPS = [
+  { name: "Кухня",   cats: ["Сети під спорт","Мексика (під ЧС-2026)","Снеки під кальян",
+                            "Бургери і сендвічі","Гаряче","Паста","Салати","Гарніри і соуси"] },
+  { name: "Бар",     cats: ["Коктейлі"] },
+  { name: "Кальяни", cats: ["Кальяни"] },
+  { name: "Чай",     cats: ["Китайський чай"] },
+  { name: "Десерти", cats: ["Десерти"] },
+  { name: "Напої",   cats: ["Напої"] },
+];
+
+/* ── OVERLAY ────────────────────────────────────────────────────────────────
+   items: за product_id з Poster → { desc, hit, _name }
+   cats:  за назвою категорії    → { eyebrow, subtitle }
+   Знайти product_id нової позиції: відкрий консоль (F12) — там підказка. */
+const OVERLAY = {
+  "items": {
+    "131": { "desc": "Апероль, просекко і содова — літня класика.", "_name": "Апероль Шприц" },
+    "132": { "desc": "Подвійна яловичина, чедер, бекон, гострий соус.", "hit": true, "_name": "Бургер «Inferno»" },
+    "133": { "desc": "Велика тортілья з м'ясом, сиром, овочами і соусом.", "_name": "Бурріто" },
+    "134": { "desc": "Віскі, лимон, цукор і білок — оксамитова піна.", "hit": true, "_name": "Віскі Сауер" },
+    "135": { "desc": "Часточки з паприкою і часником.", "_name": "Гарнір: Картопля по-селянськи" },
+    "136": { "desc": "Асорті овочів на грилі.", "_name": "Гарнір: Овочі гриль" },
+    "137": { "desc": "Хрустка картопля фрі.", "_name": "Гарнір: Фрі" },
+    "138": { "desc": "Ром, лайм і цукор — баланс класики.", "_name": "Дайкірі" },
+    "139": { "desc": "Джин, огірок, лайм і м'ята — свіжий садовий.", "_name": "Джин Гарден" },
+    "140": { "desc": "Великий глечик домашнього лимонаду на компанію.", "hit": true, "_name": "Домашній лимонад (глечик)" },
+    "141": { "desc": "Порційний келих домашнього лимонаду.", "_name": "Домашній лимонад (келих)" },
+    "142": { "desc": "Горілка, кавовий лікер і еспресо — бадьорить.", "hit": true, "_name": "Еспресо Мартіні" },
+    "143": { "desc": "Еспресо, американо або капучино.", "_name": "Кава" },
+    "144": { "desc": "З паприкою і часником.", "_name": "Картопля по-селянськи" },
+    "145": { "desc": "Тортілья, курка, розплавлений сир, сальса.", "_name": "Кесаділья куряча" },
+    "146": { "desc": "Яловичина, сир, халапеньйо.", "_name": "Кесаділья м'ясна" },
+    "147": { "desc": "Курка, бекон, овочі, тости.", "_name": "Клаб-сендвіч" },
+    "148": { "desc": "Асорті, з картоплею і гірчицею.", "_name": "Ковбаски-гриль" },
+    "149": { "desc": "Фірмові авторські коктейлі «Inferno».", "hit": true, "_name": "Коктейль авторський «Inferno»" },
+    "150": { "desc": "Класичні коктейлі бару.", "_name": "Коктейль класичний" },
+    "151": { "desc": "Горілка, лікер, журавлина і лайм.", "_name": "Космополітан" },
+    "152": { "desc": "Медово-копчені й липкі.", "_name": "Крильця BBQ" },
+    "153": { "desc": "У хрусткій паніровці, соус на вибір.", "_name": "Курячі стрипси" },
+    "154": { "desc": "З гарніром на вибір.", "_name": "Куряче філе-гриль" },
+    "155": { "desc": "З овочами-гриль і соусом.", "_name": "Курячий шашличок" },
+    "156": { "desc": "Фрі під розплавленим сиром, хрустким беконом і соусом.", "_name": "Лоадед-фрі" },
+    "157": { "desc": "Крильця, реберця BBQ, курячий шашличок і ковбаски-гриль.", "hit": true, "_name": "М'ясне плато «Пекло»" },
+    "158": { "desc": "Три тортільї з куркою або яловичиною, сиром і сальсою.", "_name": "Міні-тако" },
+    "159": { "desc": "Текіла, апельсиновий лікер і лайм, сіль на ободку.", "_name": "Маргарита" },
+    "160": { "desc": "Кульки пломбіру з топінгом.", "_name": "Морозиво" },
+    "161": { "desc": "Ром, лайм, м'ята і содова — освіжає.", "_name": "Мохіто" },
+    "162": { "desc": "Чипси тортілья під сирним соусом, халапеньйо і сальса.", "hit": true, "_name": "Начос «Пекельне полум'я»" },
+    "163": { "desc": "Джин, Кампарі і червоний вермут — гірко-цитрусова класика.", "hit": true, "_name": "Негроні" },
+    "164": { "desc": "Свіжі овочі і заправка.", "_name": "Овочевий із сиром" },
+    "165": { "desc": "Бурбон, цукор і бітер — вічна класика на льоду.", "hit": true, "_name": "Олд Фешн" },
+    "166": { "desc": "Спагеті, м'ясне рагу в томаті, пармезан.", "_name": "Паста болоньєзе" },
+    "167": { "desc": "Спагеті, бекон, вершковий соус, пармезан.", "_name": "Паста карбонара" },
+    "168": { "desc": "Гострі, у фірмовому соусі. Не для слабких.", "hit": true, "_name": "Пекельні крильця" },
+    "169": { "desc": "Розливне або пляшкове пиво.", "_name": "Пиво" },
+    "170": { "desc": "Томлені, у липкій глазурі.", "hit": true, "_name": "Реберця BBQ" },
+    "171": { "desc": "Курка або яловичина, овочі, соус.", "_name": "Рол у лаваші" },
+    "172": { "desc": "Крильця, стрипси, сирні палички, цибулеві кільця, грінки і три соуси.", "hit": true, "_name": "Сет «Inferno»" },
+    "173": { "desc": "Моцарела у клярі, кисло-солодкий соус.", "_name": "Сирні палички" },
+    "174": { "desc": "Асорті сирів, горішки і мед.", "_name": "Сирна тарілка" },
+    "175": { "desc": "Димно-солодкий соус барбекю.", "_name": "Соус BBQ" },
+    "176": { "desc": "Фірмовий пекучий соус.", "_name": "Соус гострий" },
+    "177": { "desc": "Кисло-солодкий соус.", "_name": "Соус кисло-солодкий" },
+    "178": { "desc": "Класичний ранч на травах.", "_name": "Соус ранч" },
+    "179": { "desc": "Томатна сальса з перцем.", "_name": "Соус сальса" },
+    "180": { "desc": "Теплий вершково-сирний соус.", "_name": "Соус сирний" },
+    "181": { "desc": "Вершковий соус із часником.", "_name": "Соус часниковий" },
+    "182": { "desc": "Мікс салату, яловичина, овочі.", "_name": "Теплий салат з яловичиною" },
+    "183": { "desc": "Хрусткий бекон як доповнення.", "_name": "Топінг: Бекон" },
+    "184": { "desc": "Додатковий розплавлений сир.", "_name": "Топінг: Сир" },
+    "185": { "desc": "Маринований перець халапеньйо.", "_name": "Топінг: Халапеньйо" },
+    "186": { "desc": "Класика, соус на вибір.", "_name": "Фрі" },
+    "187": { "desc": "Асорті свіжих фруктів на компанію.", "hit": true, "_name": "Фруктова тарілка" },
+    "188": { "desc": "Перчики халапеньйо з сиром у хрусткому клярі.", "_name": "Халапеньйо поппери" },
+    "189": { "desc": "Класика, як треба.", "_name": "Цезар з куркою" },
+    "190": { "desc": "Золотисті, з ранч-соусом.", "_name": "Цибулеві кільця" },
+    "191": { "desc": "Яловичина, плавлений чедер, овочі.", "_name": "Чізбургер" },
+    "192": { "desc": "Класичний ніжний чізкейк.", "_name": "Чізкейк" },
+    "193": { "desc": "Куряче філе в паніровці, соус ранч.", "_name": "Чікен-бургер" },
+    "194": { "desc": "Великий чайник фруктового чаю на компанію.", "_name": "Чайник фруктового чаю" },
+    "195": { "desc": "Із сирним соусом.", "_name": "Часникові грінки" },
+    "196": { "desc": "Гостре рагу з яловичини з квасолею, під начос.", "_name": "Чилі кон карне" },
+    "197": { "desc": "Делікатний дим, м'який смак — для легкого вечора.", "_name": "Кальян легкий" },
+    "198": { "desc": "Збалансована міцність — золота середина.", "hit": true, "_name": "Кальян середній" },
+    "199": { "desc": "Щільний дим і міцний удар — для досвідчених.", "_name": "Кальян важкий" },
+    "200": { "desc": "Бірюзовий улун — квітковий, з медовим відлунням.", "_name": "Те Гуань Інь" },
+    "201": { "desc": "Витриманий чорний пуер — землистий, зігріває.", "hit": true, "_name": "Шу Пуер" },
+    "202": { "desc": "«Великий червоний халат» — насичений улун зі смаженою ноткою.", "_name": "Да Хун Пао" },
+    "203": { "desc": "Ніжний улун з вершково-молочним ароматом.", "_name": "Молочний улун" }
+  },
+  "cats": {
+    "Сети під спорт":        { "eyebrow": "На компанію", "subtitle": "Великий стіл, довгий матч — береться одне, вистачає всім." },
+    "Мексика (під ЧС-2026)": { "eyebrow": "під ЧС-2026", "subtitle": "Мексика приймає Чемпіонат світу — зібрали стіл під трансляції." },
+    "Снеки під кальян":      { "eyebrow": "До пива", "subtitle": "Те, що хочеться руками між затяжками." },
+    "Бургери і сендвічі":    { "eyebrow": "У руку", "subtitle": "Гаряче, під яке не потрібні прибори." },
+    "Гаряче":                { "eyebrow": "Ситніше", "subtitle": "Коли прийшли не перекусити, а поїсти." },
+    "Паста":                 { "eyebrow": "З кухні", "subtitle": "" },
+    "Салати":                { "eyebrow": "Свіже", "subtitle": "" },
+    "Гарніри і соуси":       { "eyebrow": "Додатки", "subtitle": "" },
+    "Десерти":               { "eyebrow": "До чаю і кальяну", "subtitle": "" },
+    "Напої":                 { "eyebrow": "Бар", "subtitle": "Витяг — повну карту зберемо окремо." },
+    "Коктейлі":              { "eyebrow": "Бар · класика", "subtitle": "Класичні коктейлі на будь-який смак." },
+    "Кальяни":               { "eyebrow": "Дим", "subtitle": "Легкий · середній · важкий — обери міцність." },
+    "Китайський чай":        { "eyebrow": "Чайна церемонія", "subtitle": "Улуни і пуер — чайник на компанію." }
+  }
+};
+
+/* ════════════════════ далі — рушій рендера (можна не чіпати) ════════════════ */
+
+const CACHE_KEY = "inferno_menu_cache_v1";
+const FLAME = '<svg class="flame" width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2c1 4-2 5-3 8-1 2 0 4 2 4 2 0 3-2 2-4 3 2 5 5 5 8a7 7 0 1 1-14 0c0-5 6-7 8-16z" fill="#E8631F"/></svg>';
+const CHEV  = '<svg class="chev" width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+try { const T = window.Telegram && window.Telegram.WebApp; if (T) { T.ready(); T.expand && T.expand(); } } catch (e) {}
+
+const $ = (id) => document.getElementById(id);
+function el(tag, props, kids){
+  const n = document.createElement(tag);
+  if (props) for (const k in props){
+    const v = props[k];
+    if (v == null || v === false) continue;
+    if (k === "class") n.className = v;
+    else if (k === "text") n.textContent = v;        // user data → завжди безпечно
+    else if (k === "html") n.innerHTML = v;           // лише наші статичні SVG
+    else if (k.slice(0,2) === "on") n.addEventListener(k.slice(2), v);
+    else n.setAttribute(k, v);
+  }
+  if (kids) for (const c of (Array.isArray(kids) ? kids : [kids])){
+    if (c == null) continue;
+    n.appendChild(typeof c === "string" ? document.createTextNode(c) : c);
+  }
+  return n;
+}
+const safeImg = (u) => (typeof u === "string" && /^https:\/\//.test(u)) ? u : "";
+const safeBgUrl = (u) => (typeof u === "string" && /^https:\/\//.test(u) && !/["'()\s;\\<>]/.test(u)) ? u : "";
+const money = (uah) => Math.round(Number(uah) || 0).toLocaleString("uk-UA") + " ₴";
+const meta = (id) => OVERLAY.items[String(id)] || {};
+const reduceMotion = () => !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+const kwFor = (catNm) => (IMG.kw && IMG.kw[catNm]) || IMG.fallback;
+function photoFor(p, catNm){
+  const real = safeImg(p.photo);
+  if (real) return real;
+  if (!IMG.enabled) return "";
+  return IMG.base + encodeURIComponent(kwFor(catNm)) + "?lock=" + encodeURIComponent(p.id);
+}
+
+let DATA = null;
+let promoTimer = null;
+let promoCtl = null;
+document.addEventListener("visibilitychange", () => { if (promoCtl) (document.hidden ? promoCtl.stop : promoCtl.restart)(); });
+
+function valid(d){ return !!d && !d.error && Array.isArray(d.products) && Array.isArray(d.categories); }
+
+async function load(){
+  let data = null, stale = false;
+  try {
+    const ctrl = new AbortController();
+    const to = setTimeout(() => ctrl.abort(), 12000);
+    const r = await fetch(CONFIG.source, { signal: ctrl.signal, cache: "no-store" });
+    clearTimeout(to);
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    data = await r.json();
+    if (!valid(data)) throw new Error("bad payload");
+    try { localStorage.setItem(CACHE_KEY, JSON.stringify(data)); } catch (e) {}
+  } catch (e) {
+    data = null;
+    try {
+      const c = localStorage.getItem(CACHE_KEY);
+      const parsed = c ? JSON.parse(c) : null;
+      if (valid(parsed)) { data = parsed; stale = true; }
+    } catch (e2) {}
+    if (!data) return renderError();
+  }
+  try { DATA = data; render(data, stale); }
+  catch (e) { console.error("render failed", e); renderError(); }
+}
+
+function renderError(){
+  const m = $("menu"); m.innerHTML = "";
+  m.appendChild(el("div", { class: "state" }, [
+    el("div", { text: "Не вдалося завантажити меню 😔" }),
+    el("button", { class: "retry", text: "Спробувати ще раз", onclick: load }),
+  ]));
+  $("live").textContent = "";
+}
+
+function render(data, stale){
+  const byCat = {};
+  for (const p of data.products){
+    if (!p) continue;
+    (byCat[p.category_id] || (byCat[p.category_id] = [])).push(p);
+  }
+  const catName = {}; const idsByName = {};
+  for (const c of data.categories){
+    catName[c.id] = c.name;
+    (idsByName[c.name] || (idsByName[c.name] = [])).push(c.id);
+  }
+  const poolFor = (cn) => (idsByName[cn] || []).reduce((a, cid) => a.concat(byCat[cid] || []), []);
+
+  const used = new Set();
+  const groups = [];
+  for (const g of GROUPS){
+    const cats = g.cats.filter((cn) => idsByName[cn]);
+    cats.forEach((cn) => used.add(cn));
+    if (cats.length) groups.push({ name: g.name, cats });
+  }
+  for (const c of data.categories){
+    if (!used.has(c.name)){ groups.push({ name: c.name, cats: [c.name] }); used.add(c.name); }
+  }
+
+  const sortItems = (arr) => arr.slice().sort((a, b) =>
+    (Number(a.sort) - Number(b.sort)) || (Number(a.id) - Number(b.id)));
+  const visible = (arr) => sortItems(arr).filter((p) => p && p.name);
+
+  const m = $("menu"); m.innerHTML = "";
+  let total = 0, rendered = 0;
+
+  const addGroup = (name, blocks, count) => {
+    if (!blocks.length) return;
+    rendered++; total += count;
+    const open = rendered === 1;
+    m.appendChild(el("details", { class: "group", open: open ? "" : null }, [
+      el("summary", null, [
+        el("span", { class: "gname", text: name }),
+        el("span", { class: "gright", html: '<span class="gcount">' + count + '</span>' + CHEV }),
+      ]),
+      el("div", { class: "group-body" }, blocks),
+    ]));
+  };
+
+  groups.forEach((g) => {
+    const present = g.cats.filter((cn) => visible(poolFor(cn)).length);
+    if (!present.length) return;
+    const multi = present.length > 1;            // >1 категорія → 2 рівні (Кухня → Мексика → страви)
+    const blocks = []; let count = 0;
+    for (const cn of present){
+      const items = visible(poolFor(cn));
+      count += items.length;
+      blocks.push(multi ? subAccordion(cn, items) : categoryBlock(cn, items));
+    }
+    addGroup(g.name, blocks, count);
+  });
+
+  // продукти без жодної відомої категорії — окрема вкладка, щоб нічого не зникло
+  const orphans = [];
+  for (const cid in byCat){ if (!(cid in catName)) orphans.push.apply(orphans, byCat[cid]); }
+  const orphanItems = visible(orphans);
+  if (orphanItems.length) addGroup("Меню", [categoryBlock("Інше", orphanItems)], orphanItems.length);
+
+  if (!total){ renderError(); return; }
+  wireAccordion();
+  renderPromo(data);
+  renderLive(stale);
+}
+
+// 2-й рівень: підкатегорія як вкладений акордеон (Кухня → Мексика → страви)
+function subAccordion(catNm, items){
+  const cm = OVERLAY.cats[catNm] || {};
+  const body = [];
+  if (cm.subtitle) body.push(el("p", { class: "section-sub", text: cm.subtitle }));
+  for (const p of orderHits(items)) body.push(itemRow(p, catNm));
+  const left = el("span", { class: "sg-left" }, [
+    cm.eyebrow ? el("span", { class: "sg-eyebrow", text: cm.eyebrow }) : null,
+    el("span", { class: "sg-title", text: titleFor(catNm, cm.eyebrow) }),
+  ]);
+  const summary = el("summary", null, [
+    left,
+    el("span", { class: "gright", html: '<span class="gcount">' + items.length + '</span>' + CHEV }),
+  ]);
+  return el("details", { class: "subgroup" }, [summary, el("div", { class: "sg-body" }, body)]);
+}
+
+// 1 рівень: заголовок категорії + страви (для вкладок з однією категорією)
+function categoryBlock(catNm, items){
+  const cm = OVERLAY.cats[catNm] || {};
+  const kids = [];
+  if (cm.eyebrow) kids.push(el("div", { class: "eyebrow", text: cm.eyebrow }));
+  kids.push(el("h3", { class: "subsec-title", text: titleFor(catNm, cm.eyebrow) }));
+  if (cm.subtitle) kids.push(el("p", { class: "section-sub", text: cm.subtitle }));
+  for (const p of orderHits(items)) kids.push(itemRow(p, catNm));
+  return el("div", { class: "subsec" }, kids);
+}
+
+const orderHits = (items) => items.filter((p) => meta(p.id).hit).concat(items.filter((p) => !meta(p.id).hit));
+
+function titleFor(name, eyebrow){
+  const eb = (eyebrow || "").trim();
+  if (!eb) return name;
+  const esc = eb.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return name.replace(new RegExp("\\s*\\(\\s*" + esc + "\\s*\\)\\s*", "i"), " ").trim() || name;
+}
+
+function itemRow(p, catNm){
+  const mt = meta(p.id);
+  const hit = !!mt.hit;
+  const photo = photoFor(p, catNm);
+  const head = el("div", { class: "item-head" }, [
+    el("span", { class: "item-name" }, [ p.name, hit ? frag(FLAME) : null ]),
+    Number(p.price_uah) > 0 ? el("span", { class: "price", text: money(p.price_uah) }) : null,
+  ]);
+  const body = [head];
+  if (mt.desc) body.push(el("div", { class: "item-desc", text: mt.desc }));
+  return el("div", { class: hit ? "featured" : "item", id: "p" + p.id }, [
+    photo ? el("img", { class: "thumb", src: photo, loading: "lazy", alt: "" }) : null,
+    el("div", { class: "ibody" }, body),
+  ]);
+}
+
+function frag(svg){ const s = el("span"); s.innerHTML = svg; return s.firstChild; }
+
+// ексклюзивний акордеон лише для ВКЛАДОК (верхній рівень); підкатегорії — незалежні
+function wireAccordion(){
+  const all = document.querySelectorAll("details.group");
+  all.forEach((d) => d.addEventListener("toggle", () => {
+    if (d.open){
+      all.forEach((o) => { if (o !== d) o.open = false; });
+      d.querySelector("summary").scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }));
+}
+
+// ── промо-банери ──
+function renderPromo(data){
+  const host = $("promo"); host.innerHTML = "";
+  if (promoTimer){ clearInterval(promoTimer); promoTimer = null; }
+  promoCtl = null;
+  const byId = {}, cn = {};
+  for (const c of data.categories) cn[c.id] = c.name;
+  for (const p of data.products) byId[p.id] = p;
+
+  const cards = [];
+  for (const pr of (PROMO || [])){
+    const prod = pr.id != null ? byId[String(pr.id)] : null;
+    if (pr.id != null && !prod) continue;
+    const mt = prod ? meta(prod.id) : {};
+    const title = pr.title || (prod && prod.name) || "";
+    const sub = pr.sub || mt.desc || "";
+    if (!title) continue;
+    const img = safeBgUrl(pr.image) || (prod ? safeBgUrl(photoFor(prod, cn[prod.category_id])) : "");
+    const price = prod && Number(prod.price_uah) > 0 ? money(prod.price_uah) : "";
+    const card = el("div", {
+      class: "promo-card" + (img ? " has-img" : ""),
+      style: img ? ('background-image:url("' + img + '")') : null,
+      role: "button", tabindex: "0",
+    }, [
+      el("span", { class: "glow", "aria-hidden": "true" }),
+      img ? el("span", { class: "scrim", "aria-hidden": "true" }) : null,
+      pr.badge ? el("span", { class: "promo-badge", text: pr.badge }) : null,
+      el("div", { class: "promo-title", text: title }),
+      sub ? el("div", { class: "promo-sub", text: sub }) : null,
+      price ? el("div", { class: "promo-price", html: "<b>" + price + "</b>" }) : null,
+    ]);
+    const go = () => prod && jumpTo(prod);
+    card.addEventListener("click", go);
+    card.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " "){ e.preventDefault(); go(); } });
+    cards.push(card);
+  }
+  if (!cards.length) return;
+
+  const track = el("div", { class: "promo-track" }, cards);
+  const viewport = el("div", { class: "promo-viewport" }, [track]);
+  host.appendChild(viewport);
+  if (cards.length === 1) return;
+
+  let idx = 0, paused = false;
+  const dots = cards.map((_, i) => el("button", {
+    type: "button", "aria-label": "Банер " + (i + 1),
+    onclick: () => { go(i); restart(); },
+  }));
+  const pauseBtn = el("button", { class: "promo-pause", type: "button",
+    "aria-label": "Пауза/відтворення", text: "⏸", onclick: togglePause });
+  host.appendChild(el("div", { class: "promo-ctrls" }, [ el("div", { class: "promo-dots" }, dots), pauseBtn ]));
+
+  function go(i){
+    idx = (i + cards.length) % cards.length;
+    track.style.transform = "translateX(" + (-idx * 100) + "%)";
+    dots.forEach((d, di) => d.setAttribute("aria-current", di === idx ? "true" : "false"));
+  }
+  function stop(){ if (promoTimer){ clearInterval(promoTimer); promoTimer = null; } }
+  function restart(){
+    stop();
+    if (!paused && CONFIG.promoRotateMs > 0 && !reduceMotion() && !document.hidden)
+      promoTimer = setInterval(() => go(idx + 1), CONFIG.promoRotateMs);
+  }
+  function togglePause(){ paused = !paused; pauseBtn.textContent = paused ? "▶" : "⏸"; restart(); }
+
+  promoCtl = { stop, restart };
+  go(0);
+  if (reduceMotion()){ paused = true; pauseBtn.textContent = "▶"; }
+  restart();
+
+  let x0 = null;
+  viewport.addEventListener("touchstart", (e) => { x0 = e.touches[0].clientX; stop(); }, { passive: true });
+  viewport.addEventListener("touchend", (e) => {
+    if (x0 != null){
+      const dx = e.changedTouches[0].clientX - x0;
+      if (Math.abs(dx) > 40) go(idx + (dx < 0 ? 1 : -1));
+    }
+    x0 = null; restart();
+  });
+}
+
+// клік по банеру → відкрити вкладку (і підкатегорію) та підсвітити позицію
+function jumpTo(prod){
+  const row = document.getElementById("p" + prod.id);
+  if (!row) return;
+  let node = row.parentElement;
+  while (node){
+    if (node.tagName === "DETAILS" && !node.open) node.open = true;
+    node = node.parentElement;
+  }
+  setTimeout(() => {
+    row.scrollIntoView({ behavior: "smooth", block: "center" });
+    row.classList.remove("flash"); void row.offsetWidth; row.classList.add("flash");
+  }, 70);
+}
+
+function renderLive(stale){
+  const box = $("live");
+  box.innerHTML = "";
+  box.appendChild(el("span", { class: "dot" + (stale ? " stale" : "") }));
+  box.appendChild(document.createTextNode(stale
+    ? "Збережена копія — ціни могли змінитись"
+    : "Ціни оновлюються з Poster автоматично"));
+}
+
+load();
+</script>
+</body>
+</html>
