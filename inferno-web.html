@@ -872,6 +872,19 @@ try {
 
 const $ = (id) => document.getElementById(id);
 
+/* ─── haptic feedback: лише в Telegram, тихий no-op поза ним ───
+   'sel' → selectionChanged; 'ok'/'err'/'warn' → notificationOccurred;
+   'light'/'medium'/'heavy' → impactOccurred */
+function hapt(k){
+  try{
+    var H = window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.HapticFeedback;
+    if (!H) return;
+    if (k==='sel' && H.selectionChanged) H.selectionChanged();
+    else if ((k==='ok'||k==='err'||k==='warn') && H.notificationOccurred) H.notificationOccurred(k==='ok'?'success':k==='err'?'error':'warning');
+    else if (H.impactOccurred) H.impactOccurred((k==='light'||k==='medium'||k==='heavy')?k:'light');
+  }catch(e){}
+}
+
 /* ─── лояльність: відкрити реєстрацію в боті ─── */
 function openLoyalty(){
   try{ var T = window.Telegram && window.Telegram.WebApp; if (T && T.HapticFeedback) T.HapticFeedback.impactOccurred("medium"); }catch(e){}
@@ -1181,6 +1194,43 @@ function sheetPop(id){
 }
 document.addEventListener("keydown", function(e){ if(e.key==="Escape" && SHEET_STACK.length) SHEET_STACK[SHEET_STACK.length-1].close(); });
 
+/* ── свайп-вниз «вживу» для шторки цілком (шапка/грип — завжди; скрол-зона —
+   лише з самого верху, scrollTop<=0; input/textarea не чіпаємо).
+   Закриття: dy>120px АБО швидкість >0.6px/ms; інакше пружина штатним transition. */
+function wireSheetDrag(sheetEl, closeFn){
+  var scroller=sheetEl.querySelector(".sheet-body");
+  var y0=null, x0=0, dy=0, dragging=false, fromScroll=false, lastY=0, lastT=0, vel=0;
+  function reset(){ sheetEl.style.transition=""; sheetEl.style.transform=""; y0=null; dragging=false; dy=0; vel=0; }
+  sheetEl.addEventListener("touchstart", function(e){
+    var t=e.target;
+    if(t && t.closest && t.closest("input,textarea")){ y0=null; return; }        // поля вводу — не драгаємо
+    y0=e.touches[0].clientY; x0=e.touches[0].clientX;
+    lastY=y0; lastT=e.timeStamp; dragging=false; dy=0; vel=0;
+    fromScroll=!!(scroller && t && scroller.contains(t));                        // (б) старт у скрол-зоні контенту
+  }, {passive:true});
+  sheetEl.addEventListener("touchmove", function(e){
+    if(y0==null) return;
+    var ty=e.touches[0].clientY, tx=e.touches[0].clientX, now=e.timeStamp;
+    var ddy=ty-y0, ddx=tx-x0;
+    if(!dragging){
+      if(ddy<-8 || (Math.abs(ddx)>Math.abs(ddy) && Math.abs(ddx)>8)){ y0=null; return; }  // вгору або вбік → не наш жест
+      if(ddy<=8 || Math.abs(ddy)<=Math.abs(ddx)) return;                                   // чекаємо вертикальний рух вниз >8px
+      if(fromScroll && scroller.scrollTop>0){ y0=null; return; }                           // список ще скролиться сам
+      dragging=true; sheetEl.style.transition="none";
+    }
+    vel=(ty-lastY)/Math.max(1, now-lastT); lastY=ty; lastT=now;                            // миттєва швидкість
+    dy=Math.max(0, ddy);
+    sheetEl.style.transform="translateX(-50%) translateY("+(dy*0.92)+"px)";                // легкий опір
+  }, {passive:true});
+  sheetEl.addEventListener("touchend", function(){
+    if(y0==null) return;
+    var close=dragging && (dy>120 || vel>0.6);
+    reset();
+    if(close){ hapt('light'); closeFn(); }
+  }, {passive:true});
+  sheetEl.addEventListener("touchcancel", reset, {passive:true});
+}
+
 function render(data, stale){
   var byCat = {}, catName = {}, idsByName = {};
   data.products.forEach(function(p){ if(!p) return; (byCat[p.category_id]||(byCat[p.category_id]=[])).push(p); });
@@ -1225,7 +1275,7 @@ function catCard(g){
     el("span",{class:"cc-go","aria-hidden":"true",html:'<svg width="20" height="20" viewBox="0 0 24 24"><path d="M5 12h13M12 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>'}) ];
   if(hits) kids.splice(1,0, el("span",{class:"cc-hit",html:FLAME+'<b>'+hits+' '+plural(hits,["хіт","хіти","хітів"])+'</b>'}));
   var card=el("button",{ class:"catcard"+(bg?" has-img":""), style: bg?('background-image:url("'+bg+'")'):null, type:"button", "aria-label":g.name }, kids);
-  card.addEventListener("click", function(){ openSheet(g.key); });
+  card.addEventListener("click", function(){ hapt('light'); openSheet(g.key); });
   return card;
 }
 
@@ -1246,7 +1296,7 @@ function openSheet(key, catNm, productId){
   var scEl=$("sheet-count"); if(scEl) scEl.textContent=g.count + " " + plural(g.count, ["позиція","позиції","позицій"]);
   var chipHost=$("sheet-chips"); chipHost.innerHTML="";
   if(g.multi){ chipHost.style.display="";
-    g.sections.forEach(function(s,i){ var b=el("button",{class:"chip",type:"button",text:titleFor(s.cat,(OVERLAY.cats[s.cat]||{}).eyebrow)}); b.addEventListener("click",function(){ selectSection(key,i); }); chipHost.appendChild(b); });
+    g.sections.forEach(function(s,i){ var b=el("button",{class:"chip",type:"button",text:titleFor(s.cat,(OVERLAY.cats[s.cat]||{}).eyebrow)}); b.addEventListener("click",function(){ hapt('sel'); selectSection(key,i); }); chipHost.appendChild(b); });
   } else { chipHost.style.display="none"; }
   var start=0; if(catNm){ g.sections.forEach(function(s,i){ if(s.cat===catNm) start=i; }); }
   window.CURRENT_SHEET = { key: key, idx: start };
@@ -1268,12 +1318,7 @@ function jumpTo(prod){
 /* sheet controls */
 $("sheet-close").addEventListener("click", closeSheet);
 $("sheet-backdrop").addEventListener("click", closeSheet);
-(function(){ var y0=null, sh=$("sheet"), grip=$("sheet-grip");
-  grip.addEventListener("touchstart", function(e){ y0=e.touches[0].clientY; sh.style.transition="none"; }, {passive:true});
-  grip.addEventListener("touchmove", function(e){ if(y0==null) return; var dy=e.touches[0].clientY-y0; if(dy>0) sh.style.transform="translateX(-50%) translateY("+dy+"px)"; }, {passive:true});
-  grip.addEventListener("touchend", function(e){ if(y0==null) return; var dy=e.changedTouches[0].clientY-y0; sh.style.transition=""; sh.style.transform=""; if(dy>90) closeSheet(); y0=null; }, {passive:true});
-  grip.addEventListener("touchcancel", function(){ sh.style.transition=""; sh.style.transform=""; y0=null; }, {passive:true});
-})();
+wireSheetDrag($("sheet"), closeSheet);
 
 /* intro */
 function initIntro(){
@@ -1522,12 +1567,7 @@ function initAdmin(){
   $("admin-backdrop").addEventListener("click", closeAdmin);
   var chips=$("admin-chips").children;
   for(var i=0;i<chips.length;i++)(function(ch){ ch.addEventListener("click", function(){ AD_TAB=ch.getAttribute("data-tab"); buildAdminTab(); }); })(chips[i]);
-  (function(){ var y0=null, sh=$("admin"), grip=$("admin-grip");
-    grip.addEventListener("touchstart", function(e){ y0=e.touches[0].clientY; sh.style.transition="none"; }, {passive:true});
-    grip.addEventListener("touchmove", function(e){ if(y0==null) return; var dy=e.touches[0].clientY-y0; if(dy>0) sh.style.transform="translateX(-50%) translateY("+dy+"px)"; }, {passive:true});
-    grip.addEventListener("touchend", function(e){ if(y0==null) return; var dy=e.changedTouches[0].clientY-y0; sh.style.transition=""; sh.style.transform=""; if(dy>90) closeAdmin(); y0=null; }, {passive:true});
-  grip.addEventListener("touchcancel", function(){ sh.style.transition=""; sh.style.transform=""; y0=null; }, {passive:true});
-  })();
+  wireSheetDrag($("admin"), closeAdmin);
   adminBadge();
 }
 initAdmin();
@@ -1753,27 +1793,27 @@ function bkForm(body){
   bkFetchBusy(iso);
   body.appendChild(el("div",{class:"bk-lab first",text:"Коли"}));
   var days=el("div",{class:"bk-scroll"});
-  for(var i=0;i<7;i++){ (function(i){ var d=bkDay(i); var off=(i===0&&closedToday); var b=el("button",{class:"bk-day",type:"button"},[el("b",{text:d.top}),el("span",{text:d.sub})]); if(F.day===i) b.setAttribute("aria-current","true"); if(off) b.setAttribute("disabled",""); else b.addEventListener("click",function(){ bkSetF({day:i,dayIso:d.iso,time:null}); }); days.appendChild(b); })(i); }
+  for(var i=0;i<7;i++){ (function(i){ var d=bkDay(i); var off=(i===0&&closedToday); var b=el("button",{class:"bk-day",type:"button"},[el("b",{text:d.top}),el("span",{text:d.sub})]); if(F.day===i) b.setAttribute("aria-current","true"); if(off) b.setAttribute("disabled",""); else b.addEventListener("click",function(){ hapt('sel'); bkSetF({day:i,dayIso:d.iso,time:null}); }); days.appendChild(b); })(i); }
   body.appendChild(days);
   if(closedToday) body.appendChild(el("div",{class:"bk-hint",text:"На сьогодні заявки закриті — обери інший день."}));
   var slots=el("div",{class:"bk-slots"}), now=new Date();
-  for(var h=12;h<=22;h++){ for(var q=0;q<(h===22?1:2);q++){ (function(h,m){ var t=("0"+h).slice(-2)+":"+(m?"30":"00"); var off=false; if(F.day===0){ var sd=new Date(); sd.setHours(h,m,0,0); off=sd.getTime()<now.getTime()+30*60000; } var b=el("button",{class:"bk-slot",type:"button",text:t}); if(off) b.setAttribute("disabled",""); if(F.time===t) b.setAttribute("aria-current","true"); if(!off) b.addEventListener("click",function(){ bkSetF({time:t}); }); slots.appendChild(b); })(h, q?30:0); } }
+  for(var h=12;h<=22;h++){ for(var q=0;q<(h===22?1:2);q++){ (function(h,m){ var t=("0"+h).slice(-2)+":"+(m?"30":"00"); var off=false; if(F.day===0){ var sd=new Date(); sd.setHours(h,m,0,0); off=sd.getTime()<now.getTime()+30*60000; } var b=el("button",{class:"bk-slot",type:"button",text:t}); if(off) b.setAttribute("disabled",""); if(F.time===t) b.setAttribute("aria-current","true"); if(!off) b.addEventListener("click",function(){ hapt('sel'); bkSetF({time:t}); }); slots.appendChild(b); })(h, q?30:0); } }
   body.appendChild(slots);
 
   body.appendChild(el("div",{class:"bk-lab",text:"Скільки гостей"}));
   var step=el("div",{class:"bk-step"});
-  var minus=el("button",{type:"button","aria-label":"Менше",text:"−"}); minus.addEventListener("click",function(){ bkSetF({party:Math.max(1,F.party-1)}); });
-  var plus=el("button",{type:"button","aria-label":"Більше",text:"+"}); plus.addEventListener("click",function(){ bkSetF({party:Math.min(14,F.party+1)}); });
+  var minus=el("button",{type:"button","aria-label":"Менше",text:"−"}); minus.addEventListener("click",function(){ hapt('light'); bkSetF({party:Math.max(1,F.party-1)}); });
+  var plus=el("button",{type:"button","aria-label":"Більше",text:"+"}); plus.addEventListener("click",function(){ hapt('light'); bkSetF({party:Math.min(14,F.party+1)}); });
   step.appendChild(minus); step.appendChild(el("div",{class:"bk-count"},[el("b",{text:String(F.party)}),el("span",{text:bkPW(F.party)})])); step.appendChild(plus);
   body.appendChild(step);
 
   var row=el("div",{class:"bk-row"}); row.appendChild(el("div",{class:"bk-lab",text:"Де сядете"}));
   var seg=el("div",{class:"bk-seg"});
-  var bMap=el("button",{type:"button",text:"Карта"}); if(F.view==='map') bMap.setAttribute("aria-current","true"); bMap.addEventListener("click",function(){ F.view='map'; bkPaint(); });
-  var bList=el("button",{type:"button",text:"Список"}); if(F.view==='list') bList.setAttribute("aria-current","true"); bList.addEventListener("click",function(){ F.view='list'; bkPaint(); });
+  var bMap=el("button",{type:"button",text:"Карта"}); if(F.view==='map') bMap.setAttribute("aria-current","true"); bMap.addEventListener("click",function(){ hapt('sel'); F.view='map'; bkPaint(); });
+  var bList=el("button",{type:"button",text:"Список"}); if(F.view==='list') bList.setAttribute("aria-current","true"); bList.addEventListener("click",function(){ hapt('sel'); F.view='list'; bkPaint(); });
   seg.appendChild(bMap); seg.appendChild(bList); row.appendChild(seg); body.appendChild(row);
   var zones=el("div",{class:"bk-scroll"});
-  BK_ZONES.forEach(function(z){ var freeN=F.time?bkFree(iso,F.time,F.party,z.id).length:z.tables.filter(function(t){return t.seats>=F.party;}).length; var b=el("button",{class:"bk-zone",type:"button"},[document.createTextNode(z.name),el("span",{text:"· "+freeN})]); if(F.zone===z.id) b.setAttribute("aria-current","true"); b.addEventListener("click",function(){ bkSetF({zone:z.id,mZone:true,mTable:false}); }); zones.appendChild(b); });
+  BK_ZONES.forEach(function(z){ var freeN=F.time?bkFree(iso,F.time,F.party,z.id).length:z.tables.filter(function(t){return t.seats>=F.party;}).length; var b=el("button",{class:"bk-zone",type:"button"},[document.createTextNode(z.name),el("span",{text:"· "+freeN})]); if(F.zone===z.id) b.setAttribute("aria-current","true"); b.addEventListener("click",function(){ hapt('sel'); bkSetF({zone:z.id,mZone:true,mTable:false}); }); zones.appendChild(b); });
   body.appendChild(zones);
   if(F.view==='map'){ body.appendChild(bkMapEl()); var lg=el("div",{class:"bk-legend"}); lg.appendChild(el("span",{html:'<i style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.25)"></i>вільний'})); lg.appendChild(el("span",{html:'<i style="background:linear-gradient(135deg,#FF9A57,#F26B22)"></i>ваш вибір'})); lg.appendChild(el("span",{html:'<i style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08)"></i>зайнято'})); body.appendChild(lg); }
   else { body.appendChild(bkListEl()); }
@@ -1789,7 +1829,7 @@ function bkForm(body){
   two.appendChild(name); two.appendChild(phone); body.appendChild(two);
   if(F.tgPrefill) body.appendChild(el("div",{style:"font-size:.78rem;color:var(--muted);margin-top:6px;",text:"Підтягнули з Telegram — перевір номер."}));
   var occ=el("div",{class:"bk-occ"});
-  BK_OCC.forEach(function(o){ var b=el("button",{type:"button",text:o}); if(F.occ===o) b.setAttribute("aria-current","true"); b.addEventListener("click",function(){ bkSetF({occ:F.occ===o?null:o}); }); occ.appendChild(b); });
+  BK_OCC.forEach(function(o){ var b=el("button",{type:"button",text:o}); if(F.occ===o) b.setAttribute("aria-current","true"); b.addEventListener("click",function(){ hapt('sel'); bkSetF({occ:F.occ===o?null:o}); }); occ.appendChild(b); });
   body.appendChild(occ);
   var cmt=el("textarea",{class:"ad-in",placeholder:"Коментар: побажання до столу, паровий коктейль заздалегідь…",style:"margin-top:12px;min-height:60px;"}); cmt.value=F.comment; cmt.addEventListener("input",function(){ F.comment=cmt.value; bkSaveDraft(); });
   body.appendChild(cmt);
@@ -1816,7 +1856,7 @@ function bkMapEl(){
   else if(z.decor==='ter'){ map.appendChild(el("div",{style:"position:absolute;inset:0;background:radial-gradient(85% 110% at 32% 55%, rgba(63,179,107,.11), transparent 62%);"})); map.appendChild(el("div",{style:"position:absolute;left:10px;top:6%;bottom:6%;width:0;border-left:2px solid rgba(255,255,255,.16);"})); map.appendChild(el("div",{class:"bk-dec",style:"left:4px;top:50%;transform:rotate(-90deg);transform-origin:left;white-space:nowrap;",text:"дальня стіна"})); map.appendChild(el("div",{style:"position:absolute;right:-40%;top:-30%;width:78%;height:160%;border-radius:50%;border:1.5px dashed rgba(255,255,255,.14);"})); map.appendChild(el("div",{class:"bk-dec",style:"right:8px;bottom:8px;",text:"кругла будівля ◠"})); map.appendChild(el("div",{class:"bk-dec",style:"left:38%;bottom:8px;color:rgba(63,179,107,.75);",text:"трава"})); }
   z.tables.forEach(function(t){ var isBusy=F.time?bkBusy(t.id,iso,F.time):false, small=t.seats<F.party, off=isBusy||small, sel=F.table===t.id;
     var b=el("button",{class:"bk-tbl",type:"button",style:"left:"+t.l+";top:"+t.t+";width:"+t.w+";height:"+t.h+";border-radius:"+(t.r?'50%':'16px')+";"},[ el("b",{text:t.label}), el("span",{text: isBusy?'зайнято':small?'замалий':bkSeatLbl(t)}) ]);
-    if(sel) b.setAttribute("aria-current","true"); if(off) b.setAttribute("disabled",""); else b.addEventListener("click",function(){ bkSetF({table:t.id,mTable:true}); }); map.appendChild(b); });
+    if(sel) b.setAttribute("aria-current","true"); if(off) b.setAttribute("disabled",""); else b.addEventListener("click",function(){ hapt('light'); bkSetF({table:t.id,mTable:true}); }); map.appendChild(b); });
   return map;
 }
 function bkListEl(){
@@ -1826,7 +1866,7 @@ function bkListEl(){
     var nm = t.kind==='stool'?'Стілець '+t.label:t.kind==='pouf'?'Пуф '+t.label:(t.zone==='fl2'?t.label+' стіл':'Стіл '+t.label);
     var tag=isBusy?'зайнято':small?'замалий':sel?'обрано':'вільний', tagColor=sel?'var(--ember-lite)':off?'rgba(166,149,127,.6)':'#3FB36B';
     var b=el("button",{type:"button"},[ el("span",{class:"rd"}), el("span",{class:"m"},[el("b",{text:nm}),el("span",{text:z.name+' · '+bkSeatLbl(t)})]), el("span",{class:"tag",style:"color:"+tagColor,text:tag}) ]);
-    if(sel) b.setAttribute("aria-current","true"); if(off) b.setAttribute("disabled",""); else b.addEventListener("click",function(){ bkSetF({table:t.id,mTable:true}); }); wrap.appendChild(b); });
+    if(sel) b.setAttribute("aria-current","true"); if(off) b.setAttribute("disabled",""); else b.addEventListener("click",function(){ hapt('light'); bkSetF({table:t.id,mTable:true}); }); wrap.appendChild(b); });
   return wrap;
 }
 function bkMine(body){
@@ -1888,7 +1928,7 @@ function bkMineCard(b){
     var cn=el("button",{class:"danger",type:"button",text:"Скасувати"}); var armed=false, tm=null;
     cn.addEventListener("click",function(){
       if(!armed){ armed=true; cn.textContent="Точно? Ще раз"; tm=setTimeout(function(){armed=false;cn.textContent="Скасувати";},2600); return; }
-      clearTimeout(tm); cn.disabled=true; cn.textContent="Скасовуємо…";
+      clearTimeout(tm); hapt('warn'); cn.disabled=true; cn.textContent="Скасовуємо…";
       bkApiCancel(b.id).then(function(j){
         if(j&&j.ok){ bkSetStatus(b.id,'cancelled'); toast("Бронь скасовано"); }
         else { toast("Не вдалося скасувати. Спробуй ще раз"); }
@@ -1929,6 +1969,7 @@ function bkFail(code){
   BK_SUBMIT=false;
   BK_ERR=bkErrMsg(code);
   if(code==="when_past"&&BK_F) BK_F.time=null;
+  hapt('err');
   toast(BK_ERR);
   bkPaint();
 }
@@ -1938,6 +1979,7 @@ function bkUUID(){
 }
 function bkSubmit(){
   if(!bkCanSubmit()) return;
+  hapt('medium');                                              // натиснення CTA, до запиту
   var F=BK_F;
   var phone=bkNormPhone(F.phone);
   if(!phone){ bkFail("phone"); return; }
@@ -1967,6 +2009,7 @@ function bkSubmit(){
           arr.push({ id:j.id, mine:true, name:payload.name, phone:payload.phone, when:payload.when, guests:payload.guests, zone:F.zone, table:F.table, occ:F.occ||null, comment:F.comment||'', status:j.status||'pending', created:Date.now(), tg:!!initData });
         bkSet(arr);
         BK_SUCC={id:j.id}; BK_ERR=null;
+        hapt('ok');                                            // екран успіху
         bkClearDraft();
         bkChips(); bkPaint(); bkUpdateStrip();
         bkPollSchedule(25000);
@@ -2022,8 +2065,8 @@ function bkApplyStatus(id,status){
   bkSetStatus(id,status,{nf:0});
   var b=bkGet().filter(function(x){return x.id===id;})[0];
   if(b){
-    if(status==='confirmed') bkPush('Бронь підтверджено: '+bkWhen(b)+'. Чекаємо на вас!');
-    else if(status==='declined') bkPush('На жаль, бронь на '+bkWhen(b)+' відхилено. Обери інший час.');
+    if(status==='confirmed'){ hapt('ok'); bkPush('Бронь підтверджено: '+bkWhen(b)+'. Чекаємо на вас!'); }
+    else if(status==='declined'){ hapt('warn'); bkPush('На жаль, бронь на '+bkWhen(b)+' відхилено. Обери інший час.'); }
     else if(status==='cancelled') bkPush('Бронь на '+bkWhen(b)+' скасовано.');
   }
   bkUpdateStrip();
@@ -2049,11 +2092,7 @@ function tabBookings(body){
   document.querySelectorAll("[data-book]").forEach(function(b){ b.addEventListener("click", function(e){ e.preventDefault(); bkOpen(); }); });
   var bc=$("book-close"); if(bc) bc.addEventListener("click", bkClose);
   var bb=$("book-backdrop"); if(bb) bb.addEventListener("click", bkClose);
-  var y0=null, sh=$("booksheet"), grip=$("book-grip");
-  if(grip){ grip.addEventListener("touchstart",function(e){ y0=e.touches[0].clientY; sh.style.transition="none"; },{passive:true});
-    grip.addEventListener("touchmove",function(e){ if(y0==null) return; var dy=e.touches[0].clientY-y0; if(dy>0) sh.style.transform="translateX(-50%) translateY("+dy+"px)"; },{passive:true});
-    grip.addEventListener("touchend",function(e){ if(y0==null) return; var dy=e.changedTouches[0].clientY-y0; sh.style.transition=""; sh.style.transform=""; if(dy>90) bkClose(); y0=null; },{passive:true});
-  grip.addEventListener("touchcancel", function(){ sh.style.transition=""; sh.style.transform=""; y0=null; }, {passive:true}); }
+  var sh=$("booksheet"); if(sh) wireSheetDrag(sh, bkClose);
   bkSet(bkGet());                             // вичистити з localStorage записи старші доби
   bkUpdateStrip();
   bkPollSchedule(3000);                       // є pending із минулого сеансу → перевіримо статус
