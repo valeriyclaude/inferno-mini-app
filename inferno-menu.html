@@ -1503,6 +1503,7 @@ var BK_ST = {
   confirmed:{label:'Підтверджено',c:'#3FB36B',bg:'rgba(63,179,107,.1)',br:'rgba(63,179,107,.35)'},
   declined:{label:'Відхилено',c:'#E88',bg:'rgba(226,74,59,.1)',br:'rgba(226,74,59,.35)'},
   cancelled:{label:'Скасовано',c:'#A6957F',bg:'rgba(255,255,255,.05)',br:'rgba(255,255,255,.14)'},
+  released:{label:'Візит завершено',c:'#A6957F',bg:'rgba(255,255,255,.05)',br:'rgba(255,255,255,.14)'},
   unknown:{label:'Невідома заявка',c:'#A6957F',bg:'rgba(255,255,255,.05)',br:'rgba(255,255,255,.14)'},
 };
 
@@ -1511,7 +1512,8 @@ function bkWhenParts(when){ var m=/^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}:\d{2})/.ex
 function bkTodayClosed(){ var last=new Date(); last.setHours(22,0,0,0); return Date.now()+30*60000 >= last.getTime(); }
 
 /* ── чесна advisory-зайнятість: /api/book/busy (лише confirmed), кеш 60с ──
-   Стіл зайнятий, якщо є підтверджена бронь цього стола в межах ±90 хв від слота. */
+   Стіл зайнятий, якщо є підтверджена бронь цього стола в межах ±150 хв від слота
+   (візит ~2.5 год; після — стіл авто-звільняється, сервер теж фільтрує минулі). */
 var BK_BUSY_CACHE = {};
 function bkFetchBusy(iso){
   var c = BK_BUSY_CACHE[iso];
@@ -1543,7 +1545,7 @@ function bkBusy(id, iso, time){
     var p = bkWhenParts(e.when);
     if (!p) continue;
     var t = new Date(p.iso + "T" + p.time + ":00").getTime();
-    if (!isNaN(t) && Math.abs(t - sel) <= 90 * 60000) return true;
+    if (!isNaN(t) && Math.abs(t - sel) < 150 * 60000) return true;  // визит ~2.5 години
   }
   return false;
 }
